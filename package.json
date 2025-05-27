@@ -1,0 +1,84 @@
+{
+  "name": "@ease-protocol/ease-sdk",
+  "version": "1.0.0",
+  "description": "ease sdk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ease-protocol/ease-sdk.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "@ease-protocol:registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "test": "jest"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./phone": {
+      "types": "./dist/phone/index.d.ts",
+      "import": "./dist/phone/index.mjs",
+      "require": "./dist/phone/index.js"
+    },
+    "./join": {
+      "types": "./dist/join/index.d.ts",
+      "import": "./dist/join/index.mjs",
+      "require": "./dist/join/index.js"
+    },
+    "./login": {
+      "types": "./dist/login/index.d.ts",
+      "import": "./dist/login/index.mjs",
+      "require": "./dist/login/index.js"
+    },
+    "./logout": {
+      "types": "./dist/logout/index.d.ts",
+      "import": "./dist/logout/index.mjs",
+      "require": "./dist/logout/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/axios": "^0.14.4",
+    "@types/jest": "^29.5.14",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "globals": "^16.0.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.2.6",
+    "tsup": "^8.4.0",
+    "typescript-eslint": "^8.26.1"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "semi": true,
+    "printWidth": 120,
+    "tabWidth": 2,
+    "useTabs": false,
+    "bracketSpacing": true,
+    "arrowParens": "always",
+    "endOfLine": "auto"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.27.1",
+    "axios": "^1.8.3"
+  }
+}

@@ -1,0 +1,21 @@
+// ease-sdk/tsconfig.json
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "esnext", // Or "commonjs" - tsup will handle output formats
+    // "outDir": "./dist", // tsup manages this, so can often be omitted here
+    // "declarationDir": "./dist", // tsup manages .d.ts output location
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node", // Or "bundler", "nodenext" for modern resolution
+    "declaration": true, // Important for tsup to pick up if it relies on tsc for .d.ts generation strategy
+    "emitDeclarationOnly": true, // If tsup handles JS/MJS, tsc might only need to emit .d.ts
+    "isolatedModules": true // Good practice with transpilers like tsup/esbuild/babel
+    // Add other options like "baseUrl", "paths" if you use them for internal project structure
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"] // "dist" should be excluded if tsc isn't meant to read from it
+}
