@@ -1,7 +1,14 @@
+import { logger } from "../utils/logger";
+import { NetworkError, createErrorFromAPIResponse, handleUnknownError } from "../utils/errors";
+
+import type { EaseSDKError } from "../utils/errors";
+
 export type ApiResponse<T> = {
   success: boolean;
   data?: T;
   error?: string;
+  statusCode?: number;
+  errorDetails?: EaseSDKError;
   headers?: Headers;
 };
 
@@ -30,20 +37,57 @@ export const api = async <T>(url: string, method: string, body: any = null, head
       let errorData;
       try {
         errorData = await response.json();
-        console.log('Error response:', JSON.stringify(errorData));
+        logger.error('API error response:', {
+          url,
+          method,
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
       } catch (jsonError) {
-        // If JSON parsing fails, use the raw response text
-        console.error('Error parsing JSON:', JSON.stringify(jsonError));
-        errorData = {error: `An error occurred while processing the response ${jsonError}`};
+        logger.error('Failed to parse error response as JSON:', {
+          url,
+          method,
+          status: response.status,
+          statusText: response.statusText,
+          parseError: jsonError
+        });
+        errorData = {
+          error: `HTTP ${response.status}: ${response.statusText}`,
+          statusCode: response.status
+        };
       }
+
+      const apiError = createErrorFromAPIResponse(
+        response.status,
+        errorData,
+        { url, method, headers }
+      );
 
       return {
         success: false,
-        error: errorData.error || 'An error occurred',
+        error: apiError.message,
+        statusCode: response.status,
+        errorDetails: apiError
       };
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      logger.error('Failed to parse successful response as JSON:', {
+        url,
+        method,
+        status: response.status,
+        parseError: jsonError
+      });
+      throw new NetworkError(
+        'Invalid JSON response from server',
+        jsonError as Error,
+        { url, method, status: response.status }
+      );
+    }
 
     return {
       success: true,
@@ -51,9 +95,19 @@ export const api = async <T>(url: string, method: string, body: any = null, head
       headers: response.headers
     };
   } catch (error: any) {
+    logger.error('Network request failed:', {
+      url,
+      method,
+      error: error.message,
+      cause: error.cause
+    });
+    
+    const networkError = handleUnknownError(error, { url, method });
+    
     return {
       success: false,
-      error: error.message || 'Error connecting to the server',
+      error: networkError.message,
+      errorDetails: networkError
     };
   }
 };
