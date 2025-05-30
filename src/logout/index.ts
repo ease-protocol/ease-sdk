@@ -1,21 +1,78 @@
 import { api } from "../api";
+import { logger } from "../utils/logger";
+import { 
+  AuthenticationError, 
+  ValidationError,
+  ErrorCode, 
+  handleUnknownError,
+  isEaseSDKError 
+} from "../utils/errors";
 
 export const logout = async (accessToken: string): Promise<void> => {
+    // Input validation
+    if (!accessToken || typeof accessToken !== 'string') {
+        throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);
+    }
+    
+    // Basic token format validation
+    if (accessToken.trim().length < 10) {
+        throw new ValidationError('Access token appears to be invalid', 'accessToken', 'token too short');
+    }
+
     try {
-        console.info('Logging out with access token:', accessToken);
+        logger.debug('Initiating logout:', {
+            tokenPrefix: accessToken.substring(0, 8) + '***'
+        });
+        
         const responseCallback = await api(
             'https://api.ease.tech/logout',
             'POST',
             {},
-            { "Authorization": `Bearer ${accessToken}` }
+            { "Authorization": `Bearer ${accessToken.trim()}` }
         );
+        
         if (!responseCallback.success) {
-            console.log('Error in logout:', responseCallback);
-            throw new Error(`Error in logout: ${responseCallback.error}`);
+            logger.error('Logout request failed:', {
+                tokenPrefix: accessToken.substring(0, 8) + '***',
+                error: responseCallback.error,
+                statusCode: responseCallback.statusCode
+            });
+            
+            if (responseCallback.errorDetails && isEaseSDKError(responseCallback.errorDetails)) {
+                throw responseCallback.errorDetails;
+            }
+            
+            // Map common logout errors
+            if (responseCallback.statusCode === 401) {
+                throw new AuthenticationError(
+                    'Invalid or expired access token',
+                    ErrorCode.UNAUTHORIZED,
+                    { tokenPrefix: accessToken.substring(0, 8) }
+                );
+            }
+            
+            throw new AuthenticationError(
+                responseCallback.error || 'Logout failed',
+                ErrorCode.AUTHENTICATION_FAILED,
+                { tokenPrefix: accessToken.substring(0, 8) }
+            );
         }
-        console.log('Logout successful:', responseCallback.data);
+        
+        logger.info('Logout successful:', {
+            tokenPrefix: accessToken.substring(0, 8) + '***',
+            responseData: responseCallback.data
+        });
     } catch (error) {
-        console.error('Error in logout function:', error);
-        throw error; // Rethrow the error to ensure the function always returns a Promise<void>
+        if (isEaseSDKError(error)) {
+            throw error;
+        }
+        
+        const enhancedError = handleUnknownError(error, {
+            operation: 'logout',
+            tokenPrefix: accessToken.substring(0, 8)
+        });
+        
+        logger.error('Unexpected error in logout:', enhancedError);
+        throw enhancedError;
     }
 }
