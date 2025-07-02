@@ -171,3 +171,19 @@ export type SignTransactionOptionsResponse = {
   publicKey: PublicKeyCredentialRequestOptionsJSON;
   sessionId: string;
 };
+
+export type AttestationDocument = {
+  module_id: string;
+  digest: string;
+  timestamp: number;
+  pcrs: Record<string, string>;
+  cabundle: string[];
+  certificate: string;
+  public_key: string;
+  nonce: string;
+};
+
+export type GetAttestationResponse = {
+  document: string;
+  publicKey: string;
+};

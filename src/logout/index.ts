@@ -18,12 +18,7 @@ export const logout = async (accessToken: string): Promise<void> => {
       tokenPrefix: accessToken.substring(0, 8) + '***',
     });
 
-    const responseCallback = await api(
-      'https://api.ease.tech/logout',
-      'POST',
-      {},
-      { Authorization: `Bearer ${accessToken.trim()}` },
-    );
+    const responseCallback = await api('/logout', 'POST', {}, { Authorization: `Bearer ${accessToken.trim()}` }, false);
 
     if (!responseCallback.success) {
       logger.error('Logout request failed:', {

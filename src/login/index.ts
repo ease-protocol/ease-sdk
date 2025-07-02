@@ -12,7 +12,7 @@ import {
 
 export const login = async (): Promise<LoginResp> => {
   try {
-    const response = await api<LoginResp>('https://api.ease.tech/login/options', 'POST');
+    const response = await api<LoginResp>('/login/options', 'POST', null, undefined, false);
 
     if (!response.success) {
       logger.error('Login options request failed:', {
@@ -88,9 +88,15 @@ export const loginCallback = async (
   }
 
   try {
-    const response = await api<APIDefaultResponse>('https://api.ease.tech/login/callback', 'POST', credential, {
-      'X-Session-Id': sessionId,
-    });
+    const response = await api<APIDefaultResponse>(
+      '/login/callback',
+      'POST',
+      credential,
+      {
+        'X-Session-Id': sessionId,
+      },
+      false,
+    );
 
     if (!response.success) {
       logger.error('Login callback failed:', {

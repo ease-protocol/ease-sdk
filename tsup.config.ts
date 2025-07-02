@@ -9,6 +9,7 @@ export default defineConfig({
     './src/phone/index.ts',
     './src/transaction/index.ts',
     './src/wallet/index.ts',
+    './src/enclave/index.ts',
   ], // ← point to your file(s)
   format: ['esm', 'cjs'],
   outDir: 'dist',

@@ -3,8 +3,9 @@ import * as phone from './phone';
 import * as login from './login';
 import * as logout from './logout';
 import * as wallet from './wallet';
+import * as enclave from './enclave';
 
-export { join, phone, login, logout, wallet };
+export { join, phone, login, logout, wallet, enclave };
 
 // Re-export logger, errors, and types for convenience
 export { logger, LogLevel } from './utils/logger';

@@ -23,12 +23,13 @@ export const join = async (accessToken: string): Promise<JoinResponse> => {
 
   try {
     const response = await api<OptionsResp>(
-      'https://api.ease.tech/join/options',
+      '/join/options',
       'POST',
       {},
       {
         Authorization: `Bearer ${accessToken.trim()}`,
       },
+      false,
     );
 
     if (!response.success) {
@@ -132,7 +133,7 @@ export const joinCallback = async (
 
   try {
     const responseCallback = await api<APIDefaultResponse>(
-      'https://api.ease.tech/join/callback',
+      '/join/callback',
       'POST',
       {
         publicKey: credential,
@@ -141,6 +142,7 @@ export const joinCallback = async (
         Authorization: `Bearer ${accessToken.trim()}`,
         'X-Session-Id': sessionId.trim(),
       },
+      false,
     );
 
     if (!responseCallback.success) {

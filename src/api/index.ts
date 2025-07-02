@@ -17,9 +17,13 @@ export const api = async <T>(
   method: string,
   body: any = null,
   headers: Record<string, string> | undefined = undefined,
+  fromEnclave: boolean = false,
 ): Promise<ApiResponse<T>> => {
   try {
-    const urlObj = new URL(url);
+    const baseUrl = fromEnclave ? 'https://relay.ease.tech/' : 'https://api.ease.tech/';
+    const fullUrl = `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
+
+    const urlObj = new URL(fullUrl);
     const path = urlObj.pathname;
 
     const options: RequestInit = {
@@ -36,7 +40,7 @@ export const api = async <T>(
       options.body = bodyString;
     }
 
-    const response = await fetch(url, options);
+    const response = await fetch(fullUrl, options);
 
     if (!response.ok) {
       let errorData;

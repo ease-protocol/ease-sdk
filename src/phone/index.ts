@@ -20,10 +20,16 @@ export const sendOtp = async (countryCode: string, phone: string): Promise<{ suc
   }
 
   try {
-    const response = await api<SendOtpResp>(`https://api.ease.tech/phone/send-otp`, 'POST', {
-      countryCode: countryCode.trim(),
-      phone: phone.trim(),
-    });
+    const response = await api<SendOtpResp>(
+      `/phone/send-otp`,
+      'POST',
+      {
+        countryCode: countryCode.trim(),
+        phone: phone.trim(),
+      },
+      undefined,
+      false,
+    );
 
     if (!response.success) {
       logger.error('OTP send failed:', {
@@ -103,12 +109,18 @@ export const verifyOtp = async (
   });
 
   try {
-    const response = await api<APIDefaultResponse>('https://api.ease.tech/phone/verify-otp', 'POST', {
-      countryCode: countryCode.trim(),
-      phone: phone.trim(),
-      otpCode: otpCode.trim(),
-      chainID: chainID.trim(),
-    });
+    const response = await api<APIDefaultResponse>(
+      '/phone/verify-otp',
+      'POST',
+      {
+        countryCode: countryCode.trim(),
+        phone: phone.trim(),
+        otpCode: otpCode.trim(),
+        chainID: chainID.trim(),
+      },
+      undefined,
+      false,
+    );
 
     if (!response.success) {
       logger.error('OTP verification failed:', {
