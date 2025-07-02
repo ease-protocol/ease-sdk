@@ -1,15 +1,16 @@
-import * as join from "./join";
-import * as phone from "./phone";
-import * as login from "./login";
-import * as logout from "./logout";
+import * as join from './join';
+import * as phone from './phone';
+import * as login from './login';
+import * as logout from './logout';
+import * as wallet from './wallet';
 
-export { join, phone, login, logout };
+export { join, phone, login, logout, wallet };
 
 // Re-export logger, errors, and types for convenience
-export { logger, LogLevel } from "./utils/logger";
-export type { LoggerConfig } from "./utils/logger";
+export { logger, LogLevel } from './utils/logger';
+export type { LoggerConfig } from './utils/logger';
 
-export { 
+export {
   EaseSDKError,
   NetworkError,
   APIError,
@@ -19,9 +20,9 @@ export {
   WebAuthnError,
   ErrorCode,
   isEaseSDKError,
-  handleUnknownError
-} from "./utils/errors";
-export type { ErrorDetails } from "./utils/errors";
+  handleUnknownError,
+} from './utils/errors';
+export type { ErrorDetails } from './utils/errors';
 
 export type {
   APIDefaultResponse,
@@ -46,8 +47,5 @@ export type {
   PublicKeyCredential,
   OptionsResp,
   LoginResp,
-  JoinResponse
-} from "./utils/type";
-
-
-
+  JoinResponse,
+} from './utils/type';

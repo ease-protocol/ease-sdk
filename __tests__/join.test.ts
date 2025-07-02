@@ -36,7 +36,7 @@ describe('Join Module', () => {
         'https://api.ease.tech/join/options',
         'POST',
         {},
-        { 'Authorization': `Bearer ${validAccessToken}` }
+        { Authorization: `Bearer ${validAccessToken}` },
       );
     });
 
@@ -53,7 +53,7 @@ describe('Join Module', () => {
         statusCode: 401,
       });
 
-      const error = await join(validAccessToken).catch(e => e);
+      const error = await join(validAccessToken).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.UNAUTHORIZED);
     });
@@ -118,7 +118,7 @@ describe('Join Module', () => {
         'https://api.ease.tech/join/options',
         'POST',
         {},
-        { 'Authorization': `Bearer ${validAccessToken}` }
+        { Authorization: `Bearer ${validAccessToken}` },
       );
     });
   });
@@ -157,9 +157,9 @@ describe('Join Module', () => {
         'POST',
         { publicKey: mockCredential },
         {
-          'Authorization': `Bearer ${validAccessToken}`,
+          Authorization: `Bearer ${validAccessToken}`,
           'X-Session-Id': validSessionId,
-        }
+        },
       );
     });
 
@@ -194,7 +194,7 @@ describe('Join Module', () => {
         statusCode: 401,
       });
 
-      const error = await joinCallback(mockCredential, validAccessToken, validSessionId).catch(e => e);
+      const error = await joinCallback(mockCredential, validAccessToken, validSessionId).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.UNAUTHORIZED);
     });
@@ -206,7 +206,7 @@ describe('Join Module', () => {
         statusCode: 400,
       });
 
-      const error = await joinCallback(mockCredential, validAccessToken, validSessionId).catch(e => e);
+      const error = await joinCallback(mockCredential, validAccessToken, validSessionId).catch((e) => e);
       expect(error).toBeInstanceOf(WebAuthnError);
       expect(error.code).toBe(ErrorCode.PASSKEY_CREATION_FAILED);
     });
@@ -241,9 +241,9 @@ describe('Join Module', () => {
         'POST',
         { publicKey: mockCredential },
         {
-          'Authorization': `Bearer ${validAccessToken}`,
+          Authorization: `Bearer ${validAccessToken}`,
           'X-Session-Id': validSessionId,
-        }
+        },
       );
     });
   });

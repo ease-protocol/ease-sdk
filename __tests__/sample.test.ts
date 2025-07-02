@@ -145,7 +145,7 @@ describe('API Module', () => {
 
     it('should include custom headers', async () => {
       const mockResponse = { data: 'test' };
-      const customHeaders = { 'Authorization': 'Bearer token' };
+      const customHeaders = { Authorization: 'Bearer token' };
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -159,7 +159,7 @@ describe('API Module', () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer token',
+          Authorization: 'Bearer token',
         },
       });
     });

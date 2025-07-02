@@ -65,7 +65,7 @@ describe('Main Index Exports', () => {
         code: EaseSDK.ErrorCode.API_ERROR,
         message: 'Test error',
       });
-      
+
       expect(error).toBeInstanceOf(EaseSDK.EaseSDKError);
       expect(error.code).toBe(EaseSDK.ErrorCode.API_ERROR);
       expect(error.message).toBe('Test error');

@@ -104,3 +104,7 @@ To publish a new version of the npm package, follow these steps:
     ```bash
     git push --tags
     ```
+
+# Generate a new PAT
+
+got to https://github.com/settings/tokens

@@ -25,7 +25,7 @@ describe('Logout Module', () => {
         'https://api.ease.tech/logout',
         'POST',
         {},
-        { 'Authorization': `Bearer ${validAccessToken}` }
+        { Authorization: `Bearer ${validAccessToken}` },
       );
     });
 
@@ -42,7 +42,7 @@ describe('Logout Module', () => {
         statusCode: 401,
       });
 
-      const error = await logout(validAccessToken).catch(e => e);
+      const error = await logout(validAccessToken).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.UNAUTHORIZED);
     });
@@ -54,7 +54,7 @@ describe('Logout Module', () => {
         statusCode: 500,
       });
 
-      const error = await logout(validAccessToken).catch(e => e);
+      const error = await logout(validAccessToken).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.AUTHENTICATION_FAILED);
     });
@@ -77,7 +77,7 @@ describe('Logout Module', () => {
         'https://api.ease.tech/logout',
         'POST',
         {},
-        { 'Authorization': `Bearer ${validAccessToken}` }
+        { Authorization: `Bearer ${validAccessToken}` },
       );
     });
 

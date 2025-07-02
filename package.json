@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -45,6 +45,16 @@
       "import": "./dist/logout/index.mjs",
       "require": "./dist/logout/index.js"
     },
+    "./transaction": {
+      "types": "./dist/transaction/index.d.ts",
+      "import": "./dist/transaction/index.mjs",
+      "require": "./dist/transaction/index.js"
+    },
+    "./wallet": {
+      "types": "./dist/wallet/index.d.ts",
+      "import": "./dist/wallet/index.mjs",
+      "require": "./dist/wallet/index.js"
+    },
     "./package.json": "./package.json"
   },
   "keywords": [],
@@ -80,5 +90,6 @@
   "dependencies": {
     "@babel/runtime": "^7.27.1",
     "axios": "^1.8.3"
-  }
+  },
+  "type": "module"
 }
