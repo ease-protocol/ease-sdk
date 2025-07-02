@@ -1,0 +1,57 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Fetch all history for npm version to work correctly
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Ensure this matches your project's Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build project
+        run: npm run build
+
+      - name: Configure Git User
+        if: success() # Only run if previous steps passed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Increase version, push and update
+        if: success() # Only run if previous steps passed
+        run: |
+          # This step will increase the patch version, create a new commit, and push it back to the PR branch.
+          # WARNING: This approach of bumping versions directly on PR branches can lead to:
+          # - Merge conflicts if multiple PRs are open simultaneously.
+          # - Unnecessary commits on PR branches.
+          # A more common practice is to bump the version on the main branch after a merge,
+          # or as part of a dedicated release workflow.
+          npm version patch -m "CI: Bump version to %s [skip ci]"
+          git push origin HEAD:${{ github.head_ref }} --follow-tags
+        env:
+          # GITHUB_TOKEN is automatically provided by GitHub Actions
+          # It needs write permissions for contents to push back to the repo.
+          # Ensure your repository's workflow permissions are configured to allow write access.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
