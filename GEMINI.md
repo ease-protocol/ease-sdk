@@ -63,11 +63,14 @@ The project is organized as follows:
 
 - `src`: Contains the source code of the SDK, written in TypeScript.
   - `api`: Contains the API client.
+  - `enclave`: Contains the enclave functionality.
   - `join`: Contains the join functionality.
   - `login`: Contains the login functionality.
   - `logout`: Contains the logout functionality.
   - `phone`: Contains the phone functionality.
+  - `transaction`: Contains the transaction functionality.
   - `utils`: Contains utility functions.
+  - `wallet`: Contains the wallet functionality.
 - `__tests__`: Contains the tests for the SDK.
 - `dist`: Contains the compiled JavaScript code.
 - `node_modules`: Contains the project dependencies.
