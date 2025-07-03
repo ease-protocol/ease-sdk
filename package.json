@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -54,6 +54,11 @@
       "types": "./dist/wallet/index.d.ts",
       "import": "./dist/wallet/index.mjs",
       "require": "./dist/wallet/index.js"
+    },
+    "./enclave": {
+      "types": "./dist/enclave/index.d.ts",
+      "import": "./dist/enclave/index.mjs",
+      "require": "./dist/enclave/index.js"
     },
     "./package.json": "./package.json"
   },

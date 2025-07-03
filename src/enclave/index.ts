@@ -3,10 +3,8 @@ import { GetAttestationResponse } from '../utils/type';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
 
-export async function getAttestation(nonce: string): Promise<GetAttestationResponse> {
-  if (typeof nonce !== 'string' || nonce.length === 0) {
-    throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: 'Nonce must be a non-empty string.' });
-  }
+export async function getAttestation(): Promise<GetAttestationResponse> {
+  const nonce = Math.random().toString(36).substring(2); // Generate a random nonce
   try {
     logger.debug(`Attempting to get attestation for nonce: ${nonce}`);
     const res = await api<GetAttestationResponse>(`/enclave/attestation?nonce=${nonce}`, 'GET', null, undefined, true);
