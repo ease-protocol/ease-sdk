@@ -20,10 +20,10 @@ describe('Phone Module', () => {
       const result = await sendOtp('+1', '1234567890');
 
       expect(result.success).toBe(true);
-      expect(mockApi).toHaveBeenCalledWith('https://api.ease.tech/phone/send-otp', 'POST', {
+      expect(mockApi).toHaveBeenCalledWith('/phone/send-otp', 'POST', {
         countryCode: '+1',
         phone: '1234567890',
-      });
+      }, undefined, false);
     });
 
     it('should validate country code', async () => {
@@ -61,10 +61,10 @@ describe('Phone Module', () => {
 
       await sendOtp('  +1  ', '  1234567890  ');
 
-      expect(mockApi).toHaveBeenCalledWith('https://api.ease.tech/phone/send-otp', 'POST', {
+      expect(mockApi).toHaveBeenCalledWith('/phone/send-otp', 'POST', {
         countryCode: '+1',
         phone: '1234567890',
-      });
+      }, undefined, false);
     });
   });
 
@@ -85,12 +85,12 @@ describe('Phone Module', () => {
       expect(result.success).toBe(true);
       expect(result.accessToken).toBe('access-token');
       expect(result.refreshToken).toBe('refresh-token');
-      expect(mockApi).toHaveBeenCalledWith('https://api.ease.tech/phone/verify-otp', 'POST', {
+      expect(mockApi).toHaveBeenCalledWith('/phone/verify-otp', 'POST', {
         countryCode: '+1',
         phone: '1234567890',
         otpCode: '123456',
         chainID: '0001',
-      });
+      }, undefined, false);
     });
 
     it('should validate all required inputs', async () => {
@@ -152,12 +152,12 @@ describe('Phone Module', () => {
 
       await verifyOtp('+1', '1234567890', '123456', 'custom-chain');
 
-      expect(mockApi).toHaveBeenCalledWith('https://api.ease.tech/phone/verify-otp', 'POST', {
+      expect(mockApi).toHaveBeenCalledWith('/phone/verify-otp', 'POST', {
         countryCode: '+1',
         phone: '1234567890',
         otpCode: '123456',
         chainID: 'custom-chain',
-      });
+      }, undefined, false);
     });
 
     it('should trim whitespace from all inputs', async () => {
@@ -172,12 +172,12 @@ describe('Phone Module', () => {
 
       await verifyOtp('  +1  ', '  1234567890  ', '  123456  ', '  0001  ');
 
-      expect(mockApi).toHaveBeenCalledWith('https://api.ease.tech/phone/verify-otp', 'POST', {
+      expect(mockApi).toHaveBeenCalledWith('/phone/verify-otp', 'POST', {
         countryCode: '+1',
         phone: '1234567890',
         otpCode: '123456',
         chainID: '0001',
-      });
+      }, undefined, false);
     });
   });
 });

@@ -12,13 +12,13 @@ export type ApiResponse<T> = {
   headers?: Headers;
 };
 
-export const api = async <T>(
+export async function api<T>(
   url: string,
   method: string,
   body: any = null,
   headers: Record<string, string> | undefined = undefined,
   fromEnclave: boolean = false,
-): Promise<ApiResponse<T>> => {
+): Promise<ApiResponse<T>> {
   try {
     const baseUrl = fromEnclave ? 'https://relay.ease.tech/' : 'https://api.ease.tech/';
     const fullUrl = `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
@@ -115,4 +115,4 @@ export const api = async <T>(
       errorDetails: networkError,
     };
   }
-};
+}

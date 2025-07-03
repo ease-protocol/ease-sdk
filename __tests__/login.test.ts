@@ -29,7 +29,7 @@ describe('Login Module', () => {
 
       expect(result.sessionId).toBe('session-123');
       expect(result.publicKey).toEqual(mockResponse.data.publicKey);
-      expect(mockApi).toHaveBeenCalledWith('https://api.ease.tech/login/options', 'POST');
+      expect(mockApi).toHaveBeenCalledWith('/login/options', 'POST', null, undefined, false);
     });
 
     it('should handle API error responses', async () => {
@@ -118,9 +118,9 @@ describe('Login Module', () => {
       expect(result.success).toBe(true);
       expect(result.accessToken).toBe('access-token');
       expect(result.refreshToken).toBe('refresh-token');
-      expect(mockApi).toHaveBeenCalledWith('https://api.ease.tech/login/callback', 'POST', mockCredential, {
+      expect(mockApi).toHaveBeenCalledWith('/login/callback', 'POST', mockCredential, {
         'X-Session-Id': validSessionId,
-      });
+      }, false);
     });
 
     it('should validate required inputs', async () => {

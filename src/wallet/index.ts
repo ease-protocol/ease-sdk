@@ -6,9 +6,10 @@ import { api } from '../api';
 const ETHERSCAN_API_KEY = '82S5SBUBPCKY3PTUX3DP6HDAHTNP1UEJVZ';
 
 export function truncateAddress(address: string): string {
-  if (typeof address !== 'string' || address.length === 0) {
-    throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: 'Address must be a non-empty string.' });
+  if (typeof address !== 'string') {
+    throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: 'Address must be a string.' });
   }
+  if (address.length === 0) return '';
   if (address.length <= 20) return address;
   return address.slice(0, 6) + '...' + address.slice(-6);
 }
@@ -84,11 +85,11 @@ export async function getWalletBalance(coin: string, address: string): Promise<s
 
     switch (coin.toUpperCase()) {
       case 'EASE': {
-        const res = await api(`https://testnet.ease.tech/v1/chain/get_currency_balance`, 'POST', {
+        const res = await api('/v1/chain/get_currency_balance', 'POST', {
           account: address,
           code: 'eosio.token',
           symbol: 'EASE',
-        });
+        }, undefined, true);
         if (!res.success || !res.data) {
           logger.error(
             `EASE balance request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
@@ -109,18 +110,15 @@ export async function getWalletBalance(coin: string, address: string): Promise<s
       }
 
       case 'BTC': {
-        const res = await api(`https://mempool.space/testnet/api/address/${address}`, 'GET');
-        if (!res.success || !res.data) {
-          logger.error(
-            `BTC balance request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
-            res.errorDetails,
-          );
-          throw (
-            res.errorDetails ||
-            new EaseSDKError({ code: ErrorCode.API_ERROR, message: `BTC balance request failed: ${res.error}` })
-          );
+        const response = await fetch(`https://mempool.space/testnet/api/address/${address}`);
+        if (!response.ok) {
+          throw new EaseSDKError({
+            code: ErrorCode.API_ERROR,
+            message: `BTC balance request failed: ${response.statusText}`,
+            statusCode: response.status,
+          });
         }
-        data = res.data;
+        data = await response.json();
         if (!data || typeof data.chain_stats !== 'object') {
           logger.warn(`BTC balance API returned invalid data structure for address: ${address}.`, { data });
           return '0';
@@ -131,21 +129,17 @@ export async function getWalletBalance(coin: string, address: string): Promise<s
       }
 
       case 'ETH': {
-        const res = await api(
+        const response = await fetch(
           `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`,
-          'GET',
         );
-        if (!res.success || !res.data) {
-          logger.error(
-            `ETH balance request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
-            res.errorDetails,
-          );
-          throw (
-            res.errorDetails ||
-            new EaseSDKError({ code: ErrorCode.API_ERROR, message: `ETH balance request failed: ${res.error}` })
-          );
+        if (!response.ok) {
+          throw new EaseSDKError({
+            code: ErrorCode.API_ERROR,
+            message: `ETH balance request failed: ${response.statusText}`,
+            statusCode: response.status,
+          });
         }
-        data = res.data;
+        data = await response.json();
         if (!data || typeof data.result === 'undefined') {
           logger.warn(`ETH balance API returned invalid data structure for address: ${address}.`, { data });
           return '0';
@@ -178,7 +172,7 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
 
     switch (coin.toUpperCase()) {
       case 'EASE': {
-        const res = await api(`https://testnet.ease.tech/v2/history/get_actions?account=${address}&limit=20`, 'GET');
+        const res = await api('/v2/history/get_actions', 'GET', { account: address, limit: 20 }, undefined, true);
         if (!res.success || !res.data) {
           logger.error(
             `EASE history request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
@@ -215,18 +209,15 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
       }
 
       case 'BTC': {
-        const res = await api(`https://mempool.space/testnet/api/address/${address}/txs`, 'GET');
-        if (!res.success || !res.data) {
-          logger.error(
-            `BTC history request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
-            res.errorDetails,
-          );
-          throw (
-            res.errorDetails ||
-            new EaseSDKError({ code: ErrorCode.API_ERROR, message: `BTC history request failed: ${res.error}` })
-          );
+        const response = await fetch(`https://mempool.space/testnet/api/address/${address}/txs`);
+        if (!response.ok) {
+          throw new EaseSDKError({
+            code: ErrorCode.API_ERROR,
+            message: `BTC history request failed: ${response.statusText}`,
+            statusCode: response.status,
+          });
         }
-        const txs = Array.isArray(res.data) ? res.data : [];
+        const txs = Array.isArray(await response.json()) ? await response.json() : [];
         logger.info(`Successfully retrieved BTC history for address: ${address}. Found ${txs.length} transactions.`);
         return txs.map((tx: any) => {
           const isIncoming = tx.vout.some((v: any) => v.scriptpubkey_address === address);
@@ -244,21 +235,17 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
       }
 
       case 'ETH': {
-        const res = await api(
+        const response = await fetch(
           `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&sort=desc&apikey=${ETHERSCAN_API_KEY}`,
-          'GET',
         );
-        if (!res.success || !res.data) {
-          logger.error(
-            `ETH history request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
-            res.errorDetails,
-          );
-          throw (
-            res.errorDetails ||
-            new EaseSDKError({ code: ErrorCode.API_ERROR, message: `ETH history request failed: ${res.error}` })
-          );
+        if (!response.ok) {
+          throw new EaseSDKError({
+            code: ErrorCode.API_ERROR,
+            message: `ETH history request failed: ${response.statusText}`,
+            statusCode: response.status,
+          });
         }
-        data = res.data;
+        data = await response.json();
 
         if (!Array.isArray(data.result)) {
           logger.warn(`Etherscan API returned non-array result for transaction history for address: ${address}.`, {

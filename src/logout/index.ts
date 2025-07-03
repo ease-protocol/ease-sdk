@@ -2,7 +2,7 @@ import { api } from '../api';
 import { logger } from '../utils/logger';
 import { AuthenticationError, ValidationError, ErrorCode, handleUnknownError, isEaseSDKError } from '../utils/errors';
 
-export const logout = async (accessToken: string): Promise<void> => {
+export async function logout(accessToken: string): Promise<void> {
   // Input validation
   if (!accessToken || typeof accessToken !== 'string') {
     throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);
@@ -60,4 +60,4 @@ export const logout = async (accessToken: string): Promise<void> => {
     logger.error('Unexpected error in logout:', enhancedError);
     throw enhancedError;
   }
-};
+}

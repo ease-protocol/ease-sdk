@@ -33,10 +33,11 @@ describe('Join Module', () => {
       expect(result.publicKey).toEqual(mockResponse.data.publicKey);
       expect(result.sessionId).toBe('session-123');
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/join/options',
+        '/join/options',
         'POST',
         {},
         { Authorization: `Bearer ${validAccessToken}` },
+        false,
       );
     });
 
@@ -115,10 +116,11 @@ describe('Join Module', () => {
       await join(`  ${validAccessToken}  `);
 
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/join/options',
+        '/join/options',
         'POST',
         {},
         { Authorization: `Bearer ${validAccessToken}` },
+        false,
       );
     });
   });
@@ -153,13 +155,14 @@ describe('Join Module', () => {
       expect(result.accessToken).toBe('new-access-token');
       expect(result.refreshToken).toBe('new-refresh-token');
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/join/callback',
+        '/join/callback',
         'POST',
         { publicKey: mockCredential },
         {
           Authorization: `Bearer ${validAccessToken}`,
           'X-Session-Id': validSessionId,
         },
+        false,
       );
     });
 
@@ -237,13 +240,14 @@ describe('Join Module', () => {
       await joinCallback(mockCredential, `  ${validAccessToken}  `, `  ${validSessionId}  `);
 
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/join/callback',
+        '/join/callback',
         'POST',
         { publicKey: mockCredential },
         {
           Authorization: `Bearer ${validAccessToken}`,
           'X-Session-Id': validSessionId,
         },
+        false,
       );
     });
   });

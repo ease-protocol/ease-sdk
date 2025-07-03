@@ -1,11 +1,10 @@
-import * as join from './join';
-import * as phone from './phone';
-import * as login from './login';
-import * as logout from './logout';
-import * as wallet from './wallet';
-import * as enclave from './enclave';
-
-export { join, phone, login, logout, wallet, enclave };
+export * from './join';
+export * from './phone';
+export * from './login';
+export * from './logout';
+export * from './wallet';
+export * from './enclave';
+export * from './transaction';
 
 // Re-export logger, errors, and types for convenience
 export { logger, LogLevel } from './utils/logger';

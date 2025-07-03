@@ -10,7 +10,7 @@ import {
   isEaseSDKError,
 } from '../utils/errors';
 
-export const login = async (): Promise<LoginResp> => {
+export async function login(): Promise<LoginResp> {
   try {
     const response = await api<LoginResp>('/login/options', 'POST', null, undefined, false);
 
@@ -63,12 +63,12 @@ export const login = async (): Promise<LoginResp> => {
     logger.error('Unexpected error in login:', enhancedError);
     throw enhancedError;
   }
-};
+}
 
-export const loginCallback = async (
+export async function loginCallback(
   credential: PublicKeyCredential,
   sessionId: string,
-): Promise<APIDefaultResponse> => {
+): Promise<APIDefaultResponse> {
   // Input validation
   if (!credential) {
     throw new ValidationError('WebAuthn credential is required', 'credential', credential);
@@ -166,4 +166,4 @@ export const loginCallback = async (
     logger.error('Unexpected error in loginCallback:', enhancedError);
     throw enhancedError;
   }
-};
+}

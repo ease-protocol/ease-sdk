@@ -22,10 +22,11 @@ describe('Logout Module', () => {
       await expect(logout(validAccessToken)).resolves.toBeUndefined();
 
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/logout',
+        '/logout',
         'POST',
         {},
         { Authorization: `Bearer ${validAccessToken}` },
+        false,
       );
     });
 
@@ -74,10 +75,11 @@ describe('Logout Module', () => {
       await logout(`  ${validAccessToken}  `);
 
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/logout',
+        '/logout',
         'POST',
         {},
         { Authorization: `Bearer ${validAccessToken}` },
+        false,
       );
     });
 

@@ -1,13 +1,15 @@
+
 import { api } from '../api';
 import { APIDefaultResponse, SendOtpResp } from '../utils/type';
 import { logger } from '../utils/logger';
 import { OTPError, ValidationError, ErrorCode, handleUnknownError, isEaseSDKError } from '../utils/errors';
 
-export const sendOtp = async (countryCode: string, phone: string): Promise<{ success: boolean }> => {
+export async function sendOtp(countryCode: string, phone: string): Promise<{ success: boolean }> {
   // Input validation
   if (!countryCode || typeof countryCode !== 'string') {
     throw new ValidationError('Country code is required and must be a string', 'countryCode', countryCode);
   }
+
 
   if (!phone || typeof phone !== 'string') {
     throw new ValidationError('Phone number is required and must be a string', 'phone', phone);
@@ -70,14 +72,14 @@ export const sendOtp = async (countryCode: string, phone: string): Promise<{ suc
     logger.error('Unexpected error in sendOtp:', enhancedError);
     throw enhancedError;
   }
-};
+}
 
-export const verifyOtp = async (
+export async function verifyOtp(
   countryCode: string,
   phone: string,
   otpCode: string,
   chainID: string = '0001', // hardcoded for now since we haven't implemented chain selection neither chainIds in the backend.
-): Promise<APIDefaultResponse> => {
+): Promise<APIDefaultResponse> {
   // Input validation
   if (!countryCode || typeof countryCode !== 'string') {
     throw new ValidationError('Country code is required and must be a string', 'countryCode', countryCode);
@@ -194,4 +196,4 @@ export const verifyOtp = async (
     logger.error('Unexpected error in verifyOtp:', enhancedError);
     throw enhancedError;
   }
-};
+}

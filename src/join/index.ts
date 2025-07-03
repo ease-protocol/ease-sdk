@@ -10,7 +10,7 @@ import {
   isEaseSDKError,
 } from '../utils/errors';
 
-export const join = async (accessToken: string): Promise<JoinResponse> => {
+export async function join(accessToken: string): Promise<JoinResponse> {
   // Input validation
   if (!accessToken || typeof accessToken !== 'string') {
     throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);
@@ -102,13 +102,13 @@ export const join = async (accessToken: string): Promise<JoinResponse> => {
     logger.error('Unexpected error in join:', enhancedError);
     throw enhancedError;
   }
-};
+}
 
-export const joinCallback = async (
+export async function joinCallback(
   credential: PublicKeyCredential,
   accessToken: string,
   sessionId: string,
-): Promise<APIDefaultResponse> => {
+): Promise<APIDefaultResponse> {
   // Input validation
   if (!credential) {
     throw new ValidationError('WebAuthn credential is required', 'credential', credential);
@@ -220,4 +220,4 @@ export const joinCallback = async (
     logger.error('Unexpected error in joinCallback:', enhancedError);
     throw enhancedError;
   }
-};
+}

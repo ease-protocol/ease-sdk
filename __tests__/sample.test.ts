@@ -20,7 +20,7 @@ describe('API Module', () => {
         json: () => Promise.resolve(mockResponse),
       } as Response);
 
-      const result = await api('https://api.ease.tech/test', 'GET');
+      const result = await api('/test', 'GET');
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockResponse);
@@ -42,7 +42,7 @@ describe('API Module', () => {
         json: () => Promise.resolve(mockResponse),
       } as Response);
 
-      const result = await api('https://api.ease.tech/test', 'POST', requestBody);
+      const result = await api('/test', 'POST', requestBody);
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockResponse);
@@ -65,7 +65,7 @@ describe('API Module', () => {
         json: () => Promise.resolve(mockResponse),
       } as Response);
 
-      const result = await api('https://api.ease.tech/login/callback', 'POST', requestBody);
+      const result = await api('/login/callback', 'POST', requestBody);
 
       expect(result.success).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith('https://api.ease.tech/login/callback', {
@@ -87,7 +87,7 @@ describe('API Module', () => {
         json: () => Promise.resolve(mockResponse),
       } as Response);
 
-      const result = await api('https://api.ease.tech/join/callback', 'POST', requestBody);
+      const result = await api('/join/callback', 'POST', requestBody);
 
       expect(result.success).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith('https://api.ease.tech/join/callback', {
@@ -108,7 +108,7 @@ describe('API Module', () => {
         json: () => Promise.resolve(errorResponse),
       } as Response);
 
-      const result = await api('https://api.ease.tech/test', 'GET');
+      const result = await api('/test', 'GET');
 
       expect(result.success).toBe(false);
       expect(result.statusCode).toBe(400);
@@ -120,7 +120,7 @@ describe('API Module', () => {
       const networkError = new Error('Network connection failed');
       mockFetch.mockRejectedValueOnce(networkError);
 
-      const result = await api('https://api.ease.tech/test', 'GET');
+      const result = await api('/test', 'GET');
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Network connection failed');
@@ -136,7 +136,7 @@ describe('API Module', () => {
         json: () => Promise.reject(new Error('Invalid JSON')),
       } as Response);
 
-      const result = await api('https://api.ease.tech/test', 'GET');
+      const result = await api('/test', 'GET');
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Invalid JSON response from server');
@@ -153,7 +153,7 @@ describe('API Module', () => {
         json: () => Promise.resolve(mockResponse),
       } as Response);
 
-      await api('https://api.ease.tech/test', 'GET', null, customHeaders);
+      await api('/test', 'GET', null, customHeaders);
 
       expect(mockFetch).toHaveBeenCalledWith('https://api.ease.tech/test', {
         method: 'GET',
