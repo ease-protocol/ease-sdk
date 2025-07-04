@@ -6,7 +6,7 @@ import {
   getWalletBalance,
   getWalletHistory,
 } from '../src/wallet';
-import { EaseSDKError, ErrorCode, NetworkError, APIError } from '../src/utils/errors';
+import { EaseSDKError, ErrorCode } from '../src/utils/errors';
 import { logger } from '../src/utils/logger';
 import { api } from '../src/api';
 
