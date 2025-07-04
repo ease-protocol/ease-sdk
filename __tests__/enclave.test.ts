@@ -1,30 +1,48 @@
 import { getAttestation } from '../src/enclave';
 import { api } from '../src/api';
 import { EaseSDKError, ErrorCode } from '../src/utils/errors';
+import * as crypto from '../src/utils/crypto';
 
 jest.mock('../src/api');
+jest.mock('../src/utils/crypto');
+
 const mockApi = api as jest.MockedFunction<typeof api>;
+const mockCrypto = crypto as jest.MockedFunction<typeof crypto>;
 
 describe('Enclave Module', () => {
   beforeEach(() => {
     mockApi.mockClear();
+    mockCrypto.parseAttestationDocument.mockClear();
   });
 
   describe('getAttestation', () => {
     it('should get attestation successfully', async () => {
-      const mockResponse = {
+      const mockAttestationDocument = {
+        module_id: 'mockModuleId',
+        digest: 'mockDigest',
+        timestamp: 1234567890,
+        pcrs: { '0': '010203' },
+        cabundle: ['040506'],
+        certificate: '070809',
+        public_key: '0a0b0c',
+        nonce: 'mockNonce',
+      };
+
+      const mockApiResponse = {
         success: true,
         data: {
-          document: 'mockDocument',
+          document: 'mockBase64EncodedDocument',
           publicKey: 'mockPublicKey',
         },
       };
-      mockApi.mockResolvedValueOnce(mockResponse);
+      mockApi.mockResolvedValueOnce(mockApiResponse);
+      mockCrypto.parseAttestationDocument.mockReturnValueOnce(mockAttestationDocument);
 
       const result = await getAttestation();
 
-      expect(result).toEqual(mockResponse.data);
-      expect(mockApi).toHaveBeenCalledWith(expect.stringMatching(/\/enclave\/attestation\?nonce=.+/), 'GET', null, undefined, true);
+      expect(result).toEqual(mockAttestationDocument);
+      expect(mockApi).toHaveBeenCalledWith(expect.stringMatching(/^\/enclave\/attestation\?nonce=[a-z0-9]+$/), 'GET', null, undefined, true);
+      expect(mockCrypto.parseAttestationDocument).toHaveBeenCalledWith('mockBase64EncodedDocument');
     });
 
     it('should handle API error responses', async () => {

@@ -1,9 +1,10 @@
 import { api } from '../api';
-import { GetAttestationResponse } from '../utils/type';
+import { AttestationDocument, GetAttestationResponse } from '../utils/type';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { parseAttestationDocument } from '../utils/crypto';
 
-export async function getAttestation(): Promise<GetAttestationResponse> {
+export async function getAttestation(): Promise<AttestationDocument> {
   const nonce = Math.random().toString(36).substring(2); // Generate a random nonce
   try {
     logger.debug(`Attempting to get attestation for nonce: ${nonce}`);
@@ -19,7 +20,7 @@ export async function getAttestation(): Promise<GetAttestationResponse> {
       );
     }
     logger.info(`Successfully retrieved attestation for nonce: ${nonce}.`);
-    return res.data;
+    return parseAttestationDocument(res.data.document);
   } catch (error) {
     throw handleUnknownError(error, { api: 'getAttestation', nonce });
   }

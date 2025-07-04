@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -66,11 +66,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/preset-env": "^7.28.0",
     "@eslint/js": "^9.22.0",
     "@types/axios": "^0.14.4",
     "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
+    "babel-jest": "^30.0.4",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
@@ -94,6 +96,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.27.1",
-    "axios": "^1.8.3"
+    "axios": "^1.8.3",
+    "cbor2": "^2.0.1"
   }
 }

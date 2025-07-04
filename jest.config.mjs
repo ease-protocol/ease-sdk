@@ -12,5 +12,10 @@ export default {
     '!src/**/*.spec.ts',
   ],
   modulePathIgnorePatterns: ['<rootDir>/src/.*\\.js$'], // Ignore JS files in src
+  transform: {
+    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.js$': 'babel-jest',
+  },
+  transformIgnorePatterns: ['/node_modules/(?!cbor2)/'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/'],
 };
