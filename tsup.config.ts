@@ -10,6 +10,7 @@ export default defineConfig({
     './src/transaction/index.ts',
     './src/wallet/index.ts',
     './src/enclave/index.ts',
+    './src/utils/type.ts',
   ], // ← point to your file(s)
   format: ['esm', 'cjs'],
   outDir: 'dist',

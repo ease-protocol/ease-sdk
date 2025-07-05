@@ -57,6 +57,16 @@ npm run format
 
 This will format the code using Prettier.
 
+### Documentation
+
+To generate the API documentation, run the following command:
+
+```bash
+npm run docs
+```
+
+This will generate markdown documentation in the `docs` directory using TypeDoc.
+
 ## Project Structure
 
 The project is organized as follows:

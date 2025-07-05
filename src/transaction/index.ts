@@ -4,7 +4,8 @@ import {
   CreateKeysInput,
   CreateKeysResponse,
   CreateTransactionResponse,
-  RecipientData,
+  SignTransactionCallbackInput,
+  SignTransactionCallbackResponse,
   SignTransactionOptionsResponse,
   TransactionIntent,
 } from '../utils/type';
@@ -12,10 +13,10 @@ import { logger } from '../utils/logger';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 
 // get addresses
-export async function getAddresses(): Promise<Address[]> {
+export async function getAddresses(accessToken: string): Promise<Address[]> {
   try {
     logger.debug('Attempting to fetch addresses.');
-    const res = await api<Address[]>('/transaction/keys/addresses', 'GET');
+    const res = await api<Address[]>('/transaction/keys/addresses', 'GET', null, { Authorization: `Bearer ${accessToken.trim()}` });
     if (!res.success || !res.data) {
       logger.error(`Failed to fetch addresses. Error: ${res.error || 'Unknown error'}`, res.errorDetails);
       throw (
@@ -38,7 +39,7 @@ export async function getAddresses(): Promise<Address[]> {
   }
 }
 
-export async function createKeys(input: CreateKeysInput): Promise<CreateKeysResponse> {
+export async function createKeys(accessToken: string, input: CreateKeysInput): Promise<CreateKeysResponse> {
   if (!input || typeof input !== 'object') {
     throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: 'Input for createKeys must be an object.' });
   }
@@ -46,7 +47,7 @@ export async function createKeys(input: CreateKeysInput): Promise<CreateKeysResp
 
   try {
     logger.debug(`Attempting to create keys with input: ${JSON.stringify(input)}`);
-    const res = await api<CreateKeysResponse>(`/transaction/keys/create`, 'POST', input);
+    const res = await api<CreateKeysResponse>(`/transaction/keys/create`, 'POST', input, { Authorization: `Bearer ${accessToken.trim()}` } );
     if (!res.success || !res.data) {
       logger.error(`Failed to create keys. Error: ${res.error || 'Unknown error'}`, res.errorDetails);
       throw (
@@ -61,7 +62,7 @@ export async function createKeys(input: CreateKeysInput): Promise<CreateKeysResp
   }
 }
 
-export async function createTransaction(intent: TransactionIntent): Promise<CreateTransactionResponse> {
+export async function createTransaction(accessToken: string,  intent: TransactionIntent): Promise<CreateTransactionResponse> {
   if (!intent || typeof intent !== 'object') {
     throw new EaseSDKError({
       code: ErrorCode.INVALID_INPUT,
@@ -72,7 +73,7 @@ export async function createTransaction(intent: TransactionIntent): Promise<Crea
 
   try {
     logger.debug('Attempting to create transaction.', intent);
-    const res = await api<CreateTransactionResponse>('/transaction/create', 'POST', intent);
+    const res = await api<CreateTransactionResponse>('/transaction/create', 'POST', intent, { Authorization: `Bearer ${accessToken.trim()}` });
     if (!res.success || !res.data) {
       logger.error('Failed to create transaction.', res.errorDetails || res.error);
       throw (
@@ -86,10 +87,10 @@ export async function createTransaction(intent: TransactionIntent): Promise<Crea
     throw handleUnknownError(error, { api: 'createTransaction', intent });
   }
 }
-export async function signTransactionOptions(): Promise<SignTransactionOptionsResponse> {
+export async function signTransactionOptions(accessToken: string): Promise<SignTransactionOptionsResponse> {
   try {
     logger.debug('Attempting to get sign transaction options.');
-    const res = await api<SignTransactionOptionsResponse>('/transaction/sign/options', 'POST');
+    const res = await api<SignTransactionOptionsResponse>('/transaction/sign/options', 'POST', {}, { Authorization: `Bearer ${accessToken.trim()}` });
     if (!res.success || !res.data) {
       logger.error(`Failed to get sign transaction options. Error: ${res.error || 'Unknown error'}`, res.errorDetails);
       throw (
@@ -111,18 +112,8 @@ export async function signTransactionOptions(): Promise<SignTransactionOptionsRe
   }
 }
 
-// sign transaction callback
-export type SignTransactionCallbackInput = {
-  response: any;
-  coin: string;
-  recipientData: RecipientData<{ transaction: any; params: any }>;
-};
-export type SignTransactionCallbackResponse = {
-  coin: string;
-  response: any;
-};
-
 export async function signTransactionCallback(
+  accessToken: string,
   sessionId: string,
   input: SignTransactionCallbackInput,
 ): Promise<SignTransactionCallbackResponse> {
@@ -142,6 +133,7 @@ export async function signTransactionCallback(
       `Attempting to sign transaction callback for session: ${sessionId} with input: ${JSON.stringify(input)}`,
     );
     const res = await api<SignTransactionCallbackResponse>(`/transaction/sign/callback`, 'POST', input, {
+      Authorization: `Bearer ${accessToken.trim()}`,
       'X-Session-Id': sessionId,
     });
     if (!res.success || !res.data) {

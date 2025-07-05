@@ -7,7 +7,7 @@ jest.mock('../src/api');
 jest.mock('../src/utils/crypto');
 
 const mockApi = api as jest.MockedFunction<typeof api>;
-const mockCrypto = crypto as jest.MockedFunction<typeof crypto>;
+const mockCrypto = crypto as jest.Mocked<typeof crypto>;
 
 describe('Enclave Module', () => {
   beforeEach(() => {

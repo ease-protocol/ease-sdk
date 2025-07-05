@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.0.10",
+  "version": "1.0.14",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "build": "tsup",
     "build:watch": "tsup --watch",
-    "test": "jest"
+    "test": "jest",
+    "docs": "typedoc --plugin typedoc-plugin-markdown --out docs src"
   },
   "exports": {
     ".": {
@@ -55,6 +56,11 @@
       "import": "./dist/wallet/index.mjs",
       "require": "./dist/wallet/index.js"
     },
+    "./utils": {
+      "types": "./dist/utils/type.d.ts",
+      "import": "./dist/utils/type.mjs",
+      "require": "./dist/utils/type.js"
+    },
     "./enclave": {
       "types": "./dist/enclave/index.d.ts",
       "import": "./dist/enclave/index.mjs",
@@ -81,6 +87,8 @@
     "prettier": "^3.5.3",
     "ts-jest": "^29.2.6",
     "tsup": "^8.4.0",
+    "typedoc": "^0.28.7",
+    "typedoc-plugin-markdown": "^4.7.0",
     "typescript-eslint": "^8.26.1"
   },
   "prettier": {

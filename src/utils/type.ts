@@ -187,3 +187,14 @@ export type GetAttestationResponse = {
   document: string;
   publicKey: string;
 };
+
+// sign transaction callback
+export type SignTransactionCallbackInput = {
+  response: any;
+  coin: string;
+  recipientData: RecipientData<{ transaction: any; params: any }>;
+};
+export type SignTransactionCallbackResponse = {
+  coin: string;
+  response: any;
+};
