@@ -12,9 +12,11 @@ export type ApiResponse<T> = {
   headers?: Headers;
 };
 
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+
 export async function api<T>(
   url: string,
-  method: string,
+  method: HttpMethod,
   body: any = null,
   headers: Record<string, string> | undefined = undefined,
   fromEnclave: boolean = false,

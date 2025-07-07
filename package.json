@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -18,7 +18,8 @@
     "build": "tsup",
     "build:watch": "tsup --watch",
     "test": "jest",
-    "docs": "typedoc --plugin typedoc-plugin-markdown --out docs src"
+    "docs": "typedoc --plugin typedoc-plugin-markdown --out docs src",
+    "compile": "tsc"
   },
   "exports": {
     ".": {
@@ -65,6 +66,11 @@
       "types": "./dist/enclave/index.d.ts",
       "import": "./dist/enclave/index.mjs",
       "require": "./dist/enclave/index.js"
+    },
+    "./refresh": {
+      "types": "./dist/refresh/index.d.ts",
+      "import": "./dist/refresh/index.mjs",
+      "require": "./dist/refresh/index.js"
     },
     "./package.json": "./package.json"
   },

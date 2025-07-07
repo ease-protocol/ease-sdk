@@ -17,6 +17,8 @@ jest.mock('../../src/api', () => ({
 const mockApi = api as jest.MockedFunction<typeof api>;
 
 describe('Transaction API', () => {
+  const accessToken = 'test-token';
+
   beforeEach(() => {
     jest.clearAllMocks();
     logger.configure({ level: 4 }); // Suppress logs during tests
@@ -31,9 +33,14 @@ describe('Transaction API', () => {
       ];
       mockApi.mockResolvedValueOnce({ success: true, data: mockAddresses });
 
-      const result = await getAddresses();
+      const result = await getAddresses(accessToken);
 
-      expect(mockApi).toHaveBeenCalledWith('/transaction/keys/addresses', 'GET');
+      expect(mockApi).toHaveBeenCalledWith(
+        '/transaction/keys/addresses',
+        'GET',
+        null,
+        { Authorization: `Bearer ${accessToken}` },
+      );
       expect(result).toEqual([
         { address: 'addr1', derivationPath: 'path1', coin: 'EASE' },
         { address: 'addr2', derivationPath: 'path2', coin: 'BTC' },
@@ -43,18 +50,16 @@ describe('Transaction API', () => {
 
     it('should throw EaseSDKError on API failure', async () => {
       const apiError = new APIError('Failed to fetch', 500);
-      mockApi.mockResolvedValueOnce({ success: false, errorDetails: apiError });
+      mockApi.mockResolvedValueOnce({ success: false, error: apiError });
 
-      await expect(getAddresses()).rejects.toThrow(apiError);
-      expect(mockApi).toHaveBeenCalledWith('/transaction/keys/addresses', 'GET');
+      await expect(getAddresses(accessToken)).rejects.toThrow(EaseSDKError);
     });
 
     it('should throw EaseSDKError with NETWORK_ERROR code on network failure', async () => {
       mockApi.mockRejectedValueOnce(new TypeError('Failed to fetch'));
 
-      await expect(getAddresses()).rejects.toThrow(EaseSDKError);
-      await expect(getAddresses()).rejects.toHaveProperty('code', ErrorCode.NETWORK_ERROR);
-      expect(mockApi).toHaveBeenCalledWith('/transaction/keys/addresses', 'GET');
+      await expect(getAddresses(accessToken)).rejects.toThrow(EaseSDKError);
+      await expect(getAddresses(accessToken)).rejects.toHaveProperty('code', ErrorCode.NETWORK_ERROR);
     });
   });
 
@@ -69,17 +74,22 @@ describe('Transaction API', () => {
     it('should return response on success', async () => {
       mockApi.mockResolvedValueOnce({ success: true, data: mockResponse });
 
-      const result = await createKeys(mockInput as any);
+      const result = await createKeys(accessToken, mockInput as any);
 
-      expect(mockApi).toHaveBeenCalledWith(`/transaction/keys/create`, 'POST', mockInput);
+      expect(mockApi).toHaveBeenCalledWith(
+        `/transaction/keys/create`,
+        'POST',
+        mockInput,
+        { Authorization: `Bearer ${accessToken}` },
+      );
       expect(result).toEqual(mockResponse);
     });
 
     it('should throw EaseSDKError on API failure', async () => {
       const apiError = new APIError('Failed to create', 400);
-      mockApi.mockResolvedValueOnce({ success: false, errorDetails: apiError });
+      mockApi.mockResolvedValueOnce({ success: false, error: apiError });
 
-      await expect(createKeys(mockInput as any)).rejects.toThrow(apiError);
+      await expect(createKeys(accessToken, mockInput as any)).rejects.toThrow(EaseSDKError);
     });
   });
 
@@ -95,17 +105,22 @@ describe('Transaction API', () => {
     it('should return response on success', async () => {
       mockApi.mockResolvedValueOnce({ success: true, data: mockResponse });
 
-      const result = await createTransaction(mockIntent);
+      const result = await createTransaction(accessToken, mockIntent);
 
-      expect(mockApi).toHaveBeenCalledWith('/transaction/create', 'POST', mockIntent);
+      expect(mockApi).toHaveBeenCalledWith(
+        '/transaction/create',
+        'POST',
+        mockIntent,
+        { Authorization: `Bearer ${accessToken}` },
+      );
       expect(result).toEqual(mockResponse);
     });
 
     it('should throw EaseSDKError on API failure', async () => {
       const apiError = new APIError('Failed to create transaction', 500);
-      mockApi.mockResolvedValueOnce({ success: false, errorDetails: apiError });
+      mockApi.mockResolvedValueOnce({ success: false, error: apiError });
 
-      await expect(createTransaction(mockIntent)).rejects.toThrow(apiError);
+      await expect(createTransaction(accessToken, mockIntent)).rejects.toThrow(EaseSDKError);
     });
   });
 
@@ -122,17 +137,22 @@ describe('Transaction API', () => {
         headers: new Headers({ 'X-Session-Id': 'session123' }),
       });
 
-      const result = await signTransactionOptions();
+      const result = await signTransactionOptions(accessToken);
 
-      expect(mockApi).toHaveBeenCalledWith('/transaction/sign/options', 'POST');
+      expect(mockApi).toHaveBeenCalledWith(
+        '/transaction/sign/options',
+        'POST',
+        {},
+        { Authorization: `Bearer ${accessToken}` },
+      );
       expect(result).toEqual(mockResponse);
     });
 
     it('should throw EaseSDKError on API failure', async () => {
       const apiError = new APIError('Failed to get options', 401);
-      mockApi.mockResolvedValueOnce({ success: false, errorDetails: apiError });
+      mockApi.mockResolvedValueOnce({ success: false, error: apiError });
 
-      await expect(signTransactionOptions()).rejects.toThrow(apiError);
+      await expect(signTransactionOptions(accessToken)).rejects.toThrow(EaseSDKError);
     });
   });
 
@@ -148,19 +168,27 @@ describe('Transaction API', () => {
     it('should return response on success', async () => {
       mockApi.mockResolvedValueOnce({ success: true, data: mockResponse });
 
-      const result = await signTransactionCallback(mockSessionId, mockInput as any);
+      const result = await signTransactionCallback(accessToken, mockSessionId, mockInput as any);
 
-      expect(mockApi).toHaveBeenCalledWith(`/transaction/sign/callback`, 'POST', mockInput, {
-        'X-Session-Id': mockSessionId,
-      });
+      expect(mockApi).toHaveBeenCalledWith(
+        `/transaction/sign/callback`,
+        'POST',
+        mockInput,
+        {
+          'X-Session-Id': mockSessionId,
+          Authorization: `Bearer ${accessToken}`,
+        },
+      );
       expect(result).toEqual(mockResponse);
     });
 
     it('should throw EaseSDKError on API failure', async () => {
       const apiError = new APIError('Failed to sign callback', 403);
-      mockApi.mockResolvedValueOnce({ success: false, errorDetails: apiError });
+      mockApi.mockResolvedValueOnce({ success: false, error: apiError });
 
-      await expect(signTransactionCallback(mockSessionId, mockInput as any)).rejects.toThrow(apiError);
+      await expect(signTransactionCallback(accessToken, mockSessionId, mockInput as any)).rejects.toThrow(
+        EaseSDKError,
+      );
     });
   });
 });

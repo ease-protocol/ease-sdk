@@ -5,6 +5,7 @@ export * from './logout';
 export * from './wallet';
 export * from './enclave';
 export * from './transaction';
+export * from './refresh';
 
 // Re-export logger, errors, and types for convenience
 export { logger, LogLevel } from './utils/logger';
