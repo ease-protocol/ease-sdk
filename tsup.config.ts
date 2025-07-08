@@ -3,7 +3,6 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: [
-    'src/index.ts',
     'src/enclave/index.ts',
     'src/login/index.ts',
     'src/join/index.ts',
