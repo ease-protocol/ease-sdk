@@ -120,10 +120,7 @@ export async function internalApi<T>(
 
     const networkError = handleUnknownError(error, { url, method });
 
-    telemetry.trackError(networkError, {
-      url: path,
-      method,
-    });
+    
 
     return {
       success: false,

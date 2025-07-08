@@ -1,7 +1,7 @@
 import { internalApi, ApiResponse } from './index';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
-import { telemetry } from '../telemetry';
+
 
 const ETHERSCAN_API_KEY = '82S5SBUBPCKY3PTUX3DP6HDAHTNP1UEJVZ'; // This should ideally be loaded from a secure config
 
@@ -35,7 +35,7 @@ export async function fetchExternalBlockchainData<T>(
             return '0' as T;
           }
           const balance = response.data[0].split(' ')[0];
-          telemetry.trackEvent('fetch_ease_balance_success', { address: address.substring(0, 8), balance });
+          
           return balance as T;
         }
         // EASE history is already handled by internalApi directly in wallet/index.ts

@@ -169,7 +169,7 @@ export async function signTransactionCallback(
     return res.data;
   } catch (error) {
     const enhancedError = handleUnknownError(error, { api: 'signTransactionCallback', sessionId, input });
-    telemetry.trackError(enhancedError, { api: 'signTransactionCallback', sessionId, input });
+    
     throw enhancedError;
   }
 }

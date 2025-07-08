@@ -1,5 +1,3 @@
-import { telemetry } from './telemetry';
-
 export * from './join';
 export * from './phone';
 export * from './login';
@@ -66,26 +64,7 @@ export type {
 } from './utils/type';
 
 export interface EaseSDKConfig {
-  telemetryEnabled?: boolean;
-  sentryDsn?: string;
-  environment?: string;
-  release?: string;
-  packageVersion?: string;
-  phoneConfig?: {
-    countryCode: string;
-    phoneNumber: string;
-    platform: 'ios' | 'android' | 'web';
-    uuid?: string;
-  };
+  // No telemetry configuration
 }
 
-export function initTelemetry(config: EaseSDKConfig) {
-  telemetry.init({
-    enabled: config.telemetryEnabled,
-    sentryDsn: config.sentryDsn,
-    environment: config.environment,
-    release: config.release,
-    packageVersion: config.packageVersion,
-    phoneConfig: config.phoneConfig,
-  });
-}
+

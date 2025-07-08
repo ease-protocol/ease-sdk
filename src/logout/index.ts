@@ -1,6 +1,6 @@
 import { internalApi as api } from '../api';
 import { logger } from '../utils/logger';
-import { telemetry } from '../telemetry';
+
 import { AuthenticationError, ValidationError, ErrorCode, handleUnknownError, isEaseSDKError } from '../utils/errors';
 
 export async function logout(accessToken: string): Promise<void> {
@@ -44,10 +44,7 @@ export async function logout(accessToken: string): Promise<void> {
       });
     }
 
-    telemetry.trackEvent('logout_success', {
-      tokenPrefix: accessToken.substring(0, 8) + '***',
-      responseData: responseCallback.data,
-    });
+    
   } catch (error) {
     if (isEaseSDKError(error)) {
       throw error;

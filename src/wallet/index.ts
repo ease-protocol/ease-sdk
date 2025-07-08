@@ -156,11 +156,7 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
         logger.info(
           `Successfully retrieved EASE history for address: ${address}. Found ${data.actions.length} actions.`,
         );
-        telemetry.trackEvent('get_wallet_history_success', {
-          coin,
-          address: truncateAddress(address),
-          count: data.actions.length,
-        });
+        
         return data.actions
           .filter((a: any) => a.act?.account === 'eosio.token' && a.act?.name === 'transfer')
           .map((action: any) => {
@@ -178,22 +174,13 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
       case 'BTC': {
         const txs = await fetchExternalBlockchainData<Transaction[]>('BTC', address, 'history');
         logger.info(`Successfully retrieved BTC history for address: ${address}. Found ${txs.length} transactions.`);
-        telemetry.trackEvent('get_wallet_history_success', {
-          coin,
-          address: truncateAddress(address),
-          count: txs.length,
-        });
         return txs;
       }
 
       case 'ETH': {
         const txs = await fetchExternalBlockchainData<Transaction[]>('ETH', address, 'history');
         logger.info(`Successfully retrieved ETH history for address: ${address}. Found ${txs.length} transactions.`);
-        telemetry.trackEvent('get_wallet_history_success', {
-          coin,
-          address: truncateAddress(address),
-          count: txs.length,
-        });
+        
         return txs;
       }
 
@@ -202,7 +189,7 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
     }
   } catch (error: unknown) {
     const enhancedError = handleUnknownError(error, { coin, address, operation: 'getWalletHistory' });
-    telemetry.trackError(enhancedError, { coin, address: truncateAddress(address), operation: 'getWalletHistory' });
+    
     throw enhancedError;
   }
 }

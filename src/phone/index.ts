@@ -1,7 +1,7 @@
 import { internalApi as api } from '../api';
 import { APIDefaultResponse, SendOtpResp } from '../utils/type';
 import { logger } from '../utils/logger';
-import { telemetry } from '../telemetry';
+
 import { OTPError, ValidationError, ErrorCode, handleUnknownError, isEaseSDKError } from '../utils/errors';
 
 export async function sendOtp(countryCode: string, phone: string): Promise<{ success: boolean }> {
@@ -50,11 +50,6 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
       });
     }
 
-    telemetry.trackEvent('send_otp_success', {
-      countryCode,
-      phonePrefix: phone.substring(0, 3) + '***',
-      success: response.data!.success,
-    });
 
     return { success: response.data!.success };
   } catch (error) {
@@ -68,11 +63,6 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
       phonePrefix: phone.substring(0, 3),
     });
 
-    telemetry.trackError(enhancedError, {
-      operation: 'sendOtp',
-      countryCode,
-      phonePrefix: phone.substring(0, 3),
-    });
 
     logger.error('Unexpected error in sendOtp:', enhancedError);
     throw enhancedError;
@@ -173,12 +163,7 @@ export async function verifyOtp(
 
     const { accessToken, refreshToken } = response.data;
 
-    telemetry.trackEvent('verify_otp_success', {
-      countryCode,
-      phonePrefix: phone.substring(0, 3) + '***',
-      hasAccessToken: !!accessToken,
-      hasRefreshToken: !!refreshToken,
-    });
+    
 
     return {
       success: true,
@@ -198,15 +183,8 @@ export async function verifyOtp(
       chainID,
     });
 
-    telemetry.trackError(enhancedError, {
-      operation: 'verifyOtp',
-      countryCode,
-      phonePrefix: phone.substring(0, 3),
-      otpLength: otpCode.length,
-      chainID,
-    });
-
     logger.error('Unexpected error in verifyOtp:', enhancedError);
     throw enhancedError;
   }
 }
+

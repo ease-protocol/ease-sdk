@@ -170,11 +170,7 @@ export async function loginCallback(credential: PublicKeyCredential, sessionId: 
       credentialId: credential.id?.substring(0, 8),
     });
 
-    telemetry.trackError(enhancedError, {
-      operation: 'loginCallback',
-      sessionId: sessionId.substring(0, 8),
-      credentialId: credential.id?.substring(0, 8),
-    });
+    
 
     logger.error('Unexpected error in loginCallback:', enhancedError);
     throw enhancedError;

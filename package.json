@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.0.25",
+  "version": "1.0.27",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -111,7 +111,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.27.1",
-    "@sentry/react-native": "^5.36.0",
     "axios": "^1.8.3",
     "cbor2": "^2.0.1",
     "tslib": "^2.x.x"

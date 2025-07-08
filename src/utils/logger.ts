@@ -14,7 +14,7 @@ export interface LoggerConfig {
 
 class Logger {
   private config: LoggerConfig = {
-    level: LogLevel.WARN,
+    level: LogLevel.DEBUG,
     prefix: '[ease-sdk]',
   };
 

@@ -2,7 +2,7 @@ import { internalApi as api } from '../api';
 import { AttestationDocument, GetAttestationResponse } from '../utils/type';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
-import { telemetry } from '../telemetry';
+
 import { parseAttestationDocument } from '../utils/crypto';
 
 export async function getAttestation(): Promise<AttestationDocument> {
@@ -20,11 +20,10 @@ export async function getAttestation(): Promise<AttestationDocument> {
         new EaseSDKError({ code: ErrorCode.API_ERROR, message: res.error || 'Unknown error getting attestation' })
       );
     }
-    telemetry.trackEvent('get_attestation_success', { nonce });
     return parseAttestationDocument(res.data.document);
   } catch (error) {
-    const enhancedError = handleUnknownError(error, { api: 'getAttestation', nonce });
-    telemetry.trackError(enhancedError, { api: 'getAttestation', nonce });
+    handleUnknownError(error, { api: 'getAttestation', nonce });
+    
     throw handleUnknownError(error, { api: 'getAttestation', nonce });
   }
 }
