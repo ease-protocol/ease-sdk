@@ -85,22 +85,27 @@ export async function getWalletBalance(coin: string, address: string): Promise<s
 
     switch (coin.toUpperCase()) {
       case 'EASE': {
-        const res = await api('/v1/chain/get_currency_balance', 'POST', {
-          account: address,
-          code: 'eosio.token',
-          symbol: 'EASE',
-        }, undefined, true);
-        if (!res.success || !res.data) {
+        const res = await fetch('https://testnet.ease.tech/v1/chain/get_currency_balance',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              account: address,
+              code: 'eosio.token',
+              symbol: 'EASE'
+            })
+          });
+        if (!res.ok) {
           logger.error(
-            `EASE balance request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
-            res.errorDetails,
+            `EASE balance request failed for address: ${address}. Error: ${res.statusText || 'Unknown error'}`,
+            { status: res.status },
           );
-          throw (
-            res.errorDetails ||
-            new EaseSDKError({ code: ErrorCode.API_ERROR, message: `EASE balance request failed: ${res.error}` })
-          );
+          throw new EaseSDKError({ code: ErrorCode.API_ERROR, message: `EASE balance request failed: ${res.statusText}` });
         }
-        data = res.data;
+        const responseBody = await res.json();
+        data = responseBody;
         if (!Array.isArray(data) || data.length === 0) {
           logger.warn(`EASE balance API returned empty or non-array result for address: ${address}.`, { data });
           return '0';
