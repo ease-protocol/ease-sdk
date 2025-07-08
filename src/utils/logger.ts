@@ -9,6 +9,7 @@ export enum LogLevel {
 export interface LoggerConfig {
   level: LogLevel;
   prefix: string;
+  packageVersion?: string;
 }
 
 class Logger {
@@ -19,6 +20,9 @@ class Logger {
 
   configure(config: Partial<LoggerConfig>): void {
     this.config = { ...this.config, ...config };
+    if (this.config.packageVersion) {
+      this.config.prefix = `[ease-sdk@${this.config.packageVersion}]`;
+    }
   }
 
   debug(message: string, ...args: any[]): void {

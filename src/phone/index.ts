@@ -1,7 +1,7 @@
-
-import { api } from '../api';
+import { internalApi as api } from '../api';
 import { APIDefaultResponse, SendOtpResp } from '../utils/type';
 import { logger } from '../utils/logger';
+import { telemetry } from '../telemetry';
 import { OTPError, ValidationError, ErrorCode, handleUnknownError, isEaseSDKError } from '../utils/errors';
 
 export async function sendOtp(countryCode: string, phone: string): Promise<{ success: boolean }> {
@@ -9,7 +9,6 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
   if (!countryCode || typeof countryCode !== 'string') {
     throw new ValidationError('Country code is required and must be a string', 'countryCode', countryCode);
   }
-
 
   if (!phone || typeof phone !== 'string') {
     throw new ValidationError('Phone number is required and must be a string', 'phone', phone);
@@ -51,7 +50,7 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
       });
     }
 
-    logger.info('OTP sent successfully:', {
+    telemetry.trackEvent('send_otp_success', {
       countryCode,
       phonePrefix: phone.substring(0, 3) + '***',
       success: response.data!.success,
@@ -64,6 +63,12 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
     }
 
     const enhancedError = handleUnknownError(error, {
+      operation: 'sendOtp',
+      countryCode,
+      phonePrefix: phone.substring(0, 3),
+    });
+
+    telemetry.trackError(enhancedError, {
       operation: 'sendOtp',
       countryCode,
       phonePrefix: phone.substring(0, 3),
@@ -168,7 +173,7 @@ export async function verifyOtp(
 
     const { accessToken, refreshToken } = response.data;
 
-    logger.debug('OTP verification successful:', {
+    telemetry.trackEvent('verify_otp_success', {
       countryCode,
       phonePrefix: phone.substring(0, 3) + '***',
       hasAccessToken: !!accessToken,
@@ -186,6 +191,14 @@ export async function verifyOtp(
     }
 
     const enhancedError = handleUnknownError(error, {
+      operation: 'verifyOtp',
+      countryCode,
+      phonePrefix: phone.substring(0, 3),
+      otpLength: otpCode.length,
+      chainID,
+    });
+
+    telemetry.trackError(enhancedError, {
       operation: 'verifyOtp',
       countryCode,
       phonePrefix: phone.substring(0, 3),

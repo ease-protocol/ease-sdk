@@ -1,12 +1,14 @@
 import { getAttestation } from '../src/enclave';
-import { api } from '../src/api';
+import { internalApi } from '../src/api';
 import { EaseSDKError, ErrorCode } from '../src/utils/errors';
 import * as crypto from '../src/utils/crypto';
 
-jest.mock('../src/api');
+jest.mock('../src/api', () => ({
+  internalApi: jest.fn(),
+}));
 jest.mock('../src/utils/crypto');
 
-const mockApi = api as jest.MockedFunction<typeof api>;
+const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 const mockCrypto = crypto as jest.Mocked<typeof crypto>;
 
 describe('Enclave Module', () => {
@@ -41,7 +43,13 @@ describe('Enclave Module', () => {
       const result = await getAttestation();
 
       expect(result).toEqual(mockAttestationDocument);
-      expect(mockApi).toHaveBeenCalledWith(expect.stringMatching(/^\/enclave\/attestation\?nonce=[a-z0-9]+$/), 'GET', null, undefined, true);
+      expect(mockApi).toHaveBeenCalledWith(
+        expect.stringMatching(/^\/enclave\/attestation\?nonce=[a-z0-9]+$/),
+        'GET',
+        null,
+        undefined,
+        true,
+      );
       expect(mockCrypto.parseAttestationDocument).toHaveBeenCalledWith('mockBase64EncodedDocument');
     });
 

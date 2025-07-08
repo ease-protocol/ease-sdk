@@ -1,7 +1,7 @@
 import { internalApi, ApiResponse } from './index';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
-import { Transaction } from '../utils/type';
+import { telemetry } from '../telemetry';
 
 const ETHERSCAN_API_KEY = '82S5SBUBPCKY3PTUX3DP6HDAHTNP1UEJVZ'; // This should ideally be loaded from a secure config
 
@@ -25,14 +25,18 @@ export async function fetchExternalBlockchainData<T>(
           body = {
             account: address,
             code: 'eosio.token',
-            symbol: 'EASE'
+            symbol: 'EASE',
           };
           response = await internalApi(url, method, body, undefined, false, true);
           if (!response.success || !Array.isArray(response.data) || response.data.length === 0) {
-            logger.warn(`EASE balance API returned empty or non-array result for address: ${address}.`, { data: response.data });
+            logger.warn(`EASE balance API returned empty or non-array result for address: ${address}.`, {
+              data: response.data,
+            });
             return '0' as T;
           }
-          return response.data[0].split(' ')[0] as T;
+          const balance = response.data[0].split(' ')[0];
+          telemetry.trackEvent('fetch_ease_balance_success', { address: address.substring(0, 8), balance });
+          return balance as T;
         }
         // EASE history is already handled by internalApi directly in wallet/index.ts
         throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: `Unsupported action for EASE: ${action}` });
@@ -42,7 +46,9 @@ export async function fetchExternalBlockchainData<T>(
           url = `https://mempool.space/testnet/api/address/${address}`;
           response = await internalApi(url, method, body, undefined, false, true);
           if (!response.success || !response.data || typeof response.data.chain_stats !== 'object') {
-            logger.warn(`BTC balance API returned invalid data structure for address: ${address}.`, { data: response.data });
+            logger.warn(`BTC balance API returned invalid data structure for address: ${address}.`, {
+              data: response.data,
+            });
             return '0' as T;
           }
           const sats = response.data.chain_stats.funded_txo_sum - response.data.chain_stats.spent_txo_sum;
@@ -51,7 +57,9 @@ export async function fetchExternalBlockchainData<T>(
           url = `https://mempool.space/testnet/api/address/${address}/txs`;
           response = await internalApi(url, method, body, undefined, false, true);
           if (!response.success || !Array.isArray(response.data)) {
-            logger.warn(`BTC history API returned invalid data structure for address: ${address}.`, { data: response.data });
+            logger.warn(`BTC history API returned invalid data structure for address: ${address}.`, {
+              data: response.data,
+            });
             return [] as T;
           }
           return response.data.map((tx: any) => {
@@ -75,7 +83,9 @@ export async function fetchExternalBlockchainData<T>(
           url = `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`;
           response = await internalApi(url, method, body, undefined, false, true);
           if (!response.success || typeof response.data?.result === 'undefined') {
-            logger.warn(`ETH balance API returned invalid data structure for address: ${address}.`, { data: response.data });
+            logger.warn(`ETH balance API returned invalid data structure for address: ${address}.`, {
+              data: response.data,
+            });
             return '0' as T;
           }
           return (Number(response.data.result) / 1e18).toFixed(8) as T;
@@ -83,7 +93,9 @@ export async function fetchExternalBlockchainData<T>(
           url = `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&sort=desc&apikey=${ETHERSCAN_API_KEY}`;
           response = await internalApi(url, method, body, undefined, false, true);
           if (!response.success || !Array.isArray(response.data?.result)) {
-            logger.warn(`Etherscan API returned non-array result for transaction history for address: ${address}.`, { data: response.data });
+            logger.warn(`Etherscan API returned non-array result for transaction history for address: ${address}.`, {
+              data: response.data,
+            });
             return [] as T;
           }
           return response.data.result.map((tx: any) => {
@@ -101,7 +113,10 @@ export async function fetchExternalBlockchainData<T>(
       default:
         throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: `Unsupported coin: ${coin}` });
     }
-    throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: `Unsupported action for coin ${coin}: ${action}` });
+    throw new EaseSDKError({
+      code: ErrorCode.INVALID_INPUT,
+      message: `Unsupported action for coin ${coin}: ${action}`,
+    });
   } catch (error: unknown) {
     throw handleUnknownError(error, { coin, address, action, operation: 'fetchExternalBlockchainData' });
   }

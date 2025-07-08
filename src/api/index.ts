@@ -1,4 +1,5 @@
 import { logger } from '../utils/logger';
+import { telemetry } from '../telemetry';
 import { NetworkError, createErrorFromAPIResponse, handleUnknownError } from '../utils/errors';
 
 import type { EaseSDKError } from '../utils/errors';
@@ -22,12 +23,13 @@ export async function internalApi<T>(
   fromEnclave: boolean = false,
   isAbsoluteUrl: boolean = false,
 ): Promise<ApiResponse<T>> {
+  let path: string = ''; // Initialize path here
   try {
     const baseUrl = fromEnclave ? 'https://relay.ease.tech/' : 'https://api.ease.tech/';
     const fullUrl = isAbsoluteUrl ? url : `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
 
     const urlObj = new URL(fullUrl);
-    const path = urlObj.pathname;
+    path = urlObj.pathname; // Assign value here
 
     const options: RequestInit = {
       method,
@@ -97,6 +99,12 @@ export async function internalApi<T>(
       });
     }
 
+    telemetry.trackEvent('api_call_success', {
+      url: path,
+      method,
+      statusCode: response.status,
+    });
+
     return {
       success: true,
       data,
@@ -111,6 +119,11 @@ export async function internalApi<T>(
     });
 
     const networkError = handleUnknownError(error, { url, method });
+
+    telemetry.trackError(networkError, {
+      url: path,
+      method,
+    });
 
     return {
       success: false,

@@ -1,4 +1,5 @@
-import { api } from '../api';
+import { internalApi as api } from '../api';
+import { telemetry } from '../telemetry';
 import { APIDefaultResponse, LoginResp, PublicKeyCredential } from '../utils/type';
 import { logger } from '../utils/logger';
 import {
@@ -47,6 +48,11 @@ export async function login(): Promise<LoginResp> {
       hasPublicKey: !!response.data.publicKey,
     });
 
+    telemetry.trackEvent('login_success', {
+      sessionId: sessionId.substring(0, 8) + '***',
+      hasPublicKey: !!response.data.publicKey,
+    });
+
     return {
       sessionId,
       publicKey: response.data.publicKey,
@@ -60,15 +66,16 @@ export async function login(): Promise<LoginResp> {
       operation: 'login',
     });
 
+    telemetry.trackError(enhancedError, {
+      operation: 'login',
+    });
+
     logger.error('Unexpected error in login:', enhancedError);
     throw enhancedError;
   }
 }
 
-export async function loginCallback(
-  credential: PublicKeyCredential,
-  sessionId: string,
-): Promise<APIDefaultResponse> {
+export async function loginCallback(credential: PublicKeyCredential, sessionId: string): Promise<APIDefaultResponse> {
   // Input validation
   if (!credential) {
     throw new ValidationError('WebAuthn credential is required', 'credential', credential);
@@ -140,7 +147,7 @@ export async function loginCallback(
 
     const { accessToken, refreshToken } = response.data;
 
-    logger.debug('Login successful:', {
+    telemetry.trackEvent('login_callback_success', {
       sessionId: sessionId.substring(0, 8) + '***',
       credentialId: credential.id.substring(0, 8) + '***',
       hasAccessToken: !!accessToken,
@@ -158,6 +165,12 @@ export async function loginCallback(
     }
 
     const enhancedError = handleUnknownError(error, {
+      operation: 'loginCallback',
+      sessionId: sessionId.substring(0, 8),
+      credentialId: credential.id?.substring(0, 8),
+    });
+
+    telemetry.trackError(enhancedError, {
       operation: 'loginCallback',
       sessionId: sessionId.substring(0, 8),
       credentialId: credential.id?.substring(0, 8),

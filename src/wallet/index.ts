@@ -3,8 +3,7 @@ import { logger } from '../utils/logger';
 import { Transaction } from '../utils/type'; // Assuming Transaction type is already defined in type.ts
 import { internalApi } from '../api';
 import { fetchExternalBlockchainData } from '../api/externalApi';
-
-
+import { telemetry } from '../telemetry';
 
 export function truncateAddress(address: string): string {
   if (typeof address !== 'string') {
@@ -82,24 +81,26 @@ export async function getWalletBalance(coin: string, address: string): Promise<s
 
   try {
     logger.debug(`Attempting to get wallet balance for coin: ${coin}, address: ${address}`);
-    let data: any;
 
     switch (coin.toUpperCase()) {
       case 'EASE': {
         const balance = await fetchExternalBlockchainData<string>('EASE', address, 'balance');
         logger.info(`Successfully retrieved EASE balance for address: ${address}. Balance: ${balance}`);
+        telemetry.trackEvent('get_wallet_balance_success', { coin, address: truncateAddress(address), balance });
         return balance;
       }
 
       case 'BTC': {
         const balance = await fetchExternalBlockchainData<string>('BTC', address, 'balance');
         logger.info(`Successfully retrieved BTC balance for address: ${address}. Balance: ${balance}`);
+        telemetry.trackEvent('get_wallet_balance_success', { coin, address: truncateAddress(address), balance });
         return balance;
       }
 
       case 'ETH': {
         const balance = await fetchExternalBlockchainData<string>('ETH', address, 'balance');
         logger.info(`Successfully retrieved ETH balance for address: ${address}. Balance: ${balance}`);
+        telemetry.trackEvent('get_wallet_balance_success', { coin, address: truncateAddress(address), balance });
         return balance;
       }
 
@@ -107,7 +108,9 @@ export async function getWalletBalance(coin: string, address: string): Promise<s
         throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: `Unsupported coin: ${coin}` });
     }
   } catch (error: unknown) {
-    throw handleUnknownError(error, { coin, address, operation: 'getWalletBalance' });
+    const enhancedError = handleUnknownError(error, { coin, address, operation: 'getWalletBalance' });
+    telemetry.trackError(enhancedError, { coin, address: truncateAddress(address), operation: 'getWalletBalance' });
+    throw enhancedError;
   }
 }
 
@@ -125,7 +128,13 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
 
     switch (coin.toUpperCase()) {
       case 'EASE': {
-        const res = await internalApi(`/v2/history/get_actions`, 'GET', { account: address, limit: 20 }, undefined, true);
+        const res = await internalApi(
+          `/v2/history/get_actions`,
+          'GET',
+          { account: address, limit: 20 },
+          undefined,
+          true,
+        );
         if (!res.success || !res.data) {
           logger.error(
             `EASE history request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
@@ -147,6 +156,11 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
         logger.info(
           `Successfully retrieved EASE history for address: ${address}. Found ${data.actions.length} actions.`,
         );
+        telemetry.trackEvent('get_wallet_history_success', {
+          coin,
+          address: truncateAddress(address),
+          count: data.actions.length,
+        });
         return data.actions
           .filter((a: any) => a.act?.account === 'eosio.token' && a.act?.name === 'transfer')
           .map((action: any) => {
@@ -164,12 +178,22 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
       case 'BTC': {
         const txs = await fetchExternalBlockchainData<Transaction[]>('BTC', address, 'history');
         logger.info(`Successfully retrieved BTC history for address: ${address}. Found ${txs.length} transactions.`);
+        telemetry.trackEvent('get_wallet_history_success', {
+          coin,
+          address: truncateAddress(address),
+          count: txs.length,
+        });
         return txs;
       }
 
       case 'ETH': {
         const txs = await fetchExternalBlockchainData<Transaction[]>('ETH', address, 'history');
         logger.info(`Successfully retrieved ETH history for address: ${address}. Found ${txs.length} transactions.`);
+        telemetry.trackEvent('get_wallet_history_success', {
+          coin,
+          address: truncateAddress(address),
+          count: txs.length,
+        });
         return txs;
       }
 
@@ -177,6 +201,8 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
         throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: `Unsupported coin: ${coin}` });
     }
   } catch (error: unknown) {
-    throw handleUnknownError(error, { coin, address, operation: 'getWalletHistory' });
+    const enhancedError = handleUnknownError(error, { coin, address, operation: 'getWalletHistory' });
+    telemetry.trackError(enhancedError, { coin, address: truncateAddress(address), operation: 'getWalletHistory' });
+    throw enhancedError;
   }
 }

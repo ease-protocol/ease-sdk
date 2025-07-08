@@ -1,9 +1,12 @@
 import { logout } from '../src/logout';
-import { api } from '../src/api';
+import { internalApi } from '../src/api';
 import { ValidationError, AuthenticationError, ErrorCode } from '../src/utils/errors';
 
-jest.mock('../src/api');
-const mockApi = api as jest.MockedFunction<typeof api>;
+jest.mock('../src/api', () => ({
+  internalApi: jest.fn(),
+}));
+
+const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
 describe('Logout Module', () => {
   beforeEach(() => {

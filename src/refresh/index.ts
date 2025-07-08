@@ -1,6 +1,7 @@
-import { api } from '../api';
+import { internalApi as api } from '../api';
 import { logger } from '../utils/logger';
-import { AuthenticationError, ErrorCode, ValidationError } from '../utils/errors';
+import { telemetry } from '../telemetry';
+import { AuthenticationError, ErrorCode, ValidationError, handleUnknownError } from '../utils/errors';
 import { APIDefaultResponse } from '../utils/type';
 
 export async function refreshToken(refreshToken: string) {
@@ -28,12 +29,14 @@ export async function refreshToken(refreshToken: string) {
       throw new AuthenticationError('Invalid token response.', ErrorCode.TOKEN_REFRESH_FAILED);
     }
 
-    logger.debug('Token refreshed successfully.');
+    telemetry.trackEvent('token_refresh_success');
     return res.data;
   } catch (error) {
-    logger.error('An unexpected error occurred during token refresh:', error);
-    if (error instanceof AuthenticationError) {
-      throw error;
+    const enhancedError = handleUnknownError(error, { operation: 'refreshToken' });
+    telemetry.trackError(enhancedError, { operation: 'refreshToken' });
+    logger.error('An unexpected error occurred during token refresh:', enhancedError);
+    if (enhancedError instanceof AuthenticationError) {
+      throw enhancedError;
     }
     throw new AuthenticationError('An unexpected error occurred.', ErrorCode.TOKEN_REFRESH_FAILED);
   }

@@ -1,4 +1,4 @@
-import { api } from '../api';
+import { internalApi as api } from '../api';
 import {
   Address,
   CreateKeysInput,
@@ -10,6 +10,7 @@ import {
   TransactionIntent,
 } from '../utils/type';
 import { logger } from '../utils/logger';
+import { telemetry } from '../telemetry';
 import { EaseSDKError, ErrorCode, handleUnknownError, ValidationError } from '../utils/errors';
 
 const validateAccessToken = (token: string) => {
@@ -23,12 +24,9 @@ export async function getAddresses(accessToken: string): Promise<Address[]> {
   validateAccessToken(accessToken);
   try {
     logger.debug('Attempting to fetch addresses.');
-    const res = await api<Address[]>(
-      '/transaction/keys/addresses',
-      'GET',
-      null,
-      { Authorization: `Bearer ${accessToken.trim()}` },
-    );
+    const res = await api<Address[]>('/transaction/keys/addresses', 'GET', null, {
+      Authorization: `Bearer ${accessToken.trim()}`,
+    });
     if (!res.success || !res.data) {
       logger.error(`Failed to fetch addresses. Error: ${res.error || 'Unknown error'}`, res.error);
       throw new EaseSDKError({ code: ErrorCode.API_ERROR, message: res.error || 'Unknown error fetching addresses' });
@@ -38,13 +36,16 @@ export async function getAddresses(accessToken: string): Promise<Address[]> {
       throw new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Invalid data format for addresses.' });
     }
     logger.info('Successfully fetched addresses.');
-    return res.data.sort((a, b) => {
+    telemetry.trackEvent('get_addresses_success');
+    return res.data.sort((a: Address, b: Address) => {
       if (a.coin === 'EASE' && b.coin !== 'EASE') return -1;
       if (b.coin === 'EASE' && a.coin !== 'EASE') return 1;
       return a.address.localeCompare(b.address);
     });
   } catch (error) {
-    throw handleUnknownError(error, { api: 'getAddresses' });
+    const enhancedError = handleUnknownError(error, { api: 'getAddresses' });
+    telemetry.trackError(enhancedError, { api: 'getAddresses' });
+    throw enhancedError;
   }
 }
 
@@ -56,20 +57,20 @@ export async function createKeys(accessToken: string, input: CreateKeysInput): P
 
   try {
     logger.debug(`Attempting to create keys with input: ${JSON.stringify(input)}`);
-    const res = await api<CreateKeysResponse>(
-      `/transaction/keys/create`,
-      'POST',
-      input,
-      { Authorization: `Bearer ${accessToken.trim()}` },
-    );
+    const res = await api<CreateKeysResponse>(`/transaction/keys/create`, 'POST', input, {
+      Authorization: `Bearer ${accessToken.trim()}`,
+    });
     if (!res.success || !res.data) {
       logger.error(`Failed to create keys. Error: ${res.error || 'Unknown error'}`, res.error);
       throw new EaseSDKError({ code: ErrorCode.API_ERROR, message: res.error || 'Unknown error creating keys' });
     }
     logger.info('Successfully created keys.');
+    telemetry.trackEvent('create_keys_success');
     return res.data;
   } catch (error) {
-    throw handleUnknownError(error, { api: 'createKeys', input });
+    const enhancedError = handleUnknownError(error, { api: 'createKeys', input });
+    telemetry.trackError(enhancedError, { api: 'createKeys', input });
+    throw enhancedError;
   }
 }
 
@@ -84,20 +85,20 @@ export async function createTransaction(
 
   try {
     logger.debug('Attempting to create transaction.', intent);
-    const res = await api<CreateTransactionResponse>(
-      '/transaction/create',
-      'POST',
-      intent,
-      { Authorization: `Bearer ${accessToken.trim()}` },
-    );
+    const res = await api<CreateTransactionResponse>('/transaction/create', 'POST', intent, {
+      Authorization: `Bearer ${accessToken.trim()}`,
+    });
     if (!res.success || !res.data) {
       logger.error('Failed to create transaction.', res.error || 'Unknown error');
       throw new EaseSDKError({ code: ErrorCode.API_ERROR, message: res.error || 'Unknown error creating transaction' });
     }
     logger.info('Successfully created transaction.');
+    telemetry.trackEvent('create_transaction_success', { coin: intent.coin });
     return res.data;
   } catch (error) {
-    throw handleUnknownError(error, { api: 'createTransaction', intent });
+    const enhancedError = handleUnknownError(error, { api: 'createTransaction', intent });
+    telemetry.trackError(enhancedError, { api: 'createTransaction', intent });
+    throw enhancedError;
   }
 }
 
@@ -123,9 +124,12 @@ export async function signTransactionOptions(accessToken: string): Promise<SignT
       logger.debug(`Retrieved session ID: ${res.data.sessionId}`);
     }
     logger.info('Successfully retrieved sign transaction options.');
+    telemetry.trackEvent('sign_transaction_options_success', { sessionId: res.data.sessionId });
     return res.data;
   } catch (error) {
-    throw handleUnknownError(error, { api: 'signTransactionOptions' });
+    const enhancedError = handleUnknownError(error, { api: 'signTransactionOptions' });
+    telemetry.trackError(enhancedError, { api: 'signTransactionOptions' });
+    throw enhancedError;
   }
 }
 
@@ -146,15 +150,10 @@ export async function signTransactionCallback(
     logger.debug(
       `Attempting to sign transaction callback for session: ${sessionId} with input: ${JSON.stringify(input)}`,
     );
-    const res = await api<SignTransactionCallbackResponse>(
-      `/transaction/sign/callback`,
-      'POST',
-      input,
-      {
-        Authorization: `Bearer ${accessToken.trim()}`,
-        'X-Session-Id': sessionId,
-      },
-    );
+    const res = await api<SignTransactionCallbackResponse>(`/transaction/sign/callback`, 'POST', input, {
+      Authorization: `Bearer ${accessToken.trim()}`,
+      'X-Session-Id': sessionId,
+    });
     if (!res.success || !res.data) {
       logger.error(
         `Failed to sign transaction callback for session: ${sessionId}. Error: ${res.error || 'Unknown error'}`,
@@ -166,8 +165,11 @@ export async function signTransactionCallback(
       });
     }
     logger.info(`Successfully signed transaction callback for session: ${sessionId}.`);
+    telemetry.trackEvent('sign_transaction_callback_success', { sessionId });
     return res.data;
   } catch (error) {
-    throw handleUnknownError(error, { api: 'signTransactionCallback', sessionId, input });
+    const enhancedError = handleUnknownError(error, { api: 'signTransactionCallback', sessionId, input });
+    telemetry.trackError(enhancedError, { api: 'signTransactionCallback', sessionId, input });
+    throw enhancedError;
   }
 }

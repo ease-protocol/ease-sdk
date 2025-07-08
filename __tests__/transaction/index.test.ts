@@ -1,4 +1,4 @@
-import { api } from '../../src/api';
+import { internalApi } from '../../src/api';
 import {
   getAddresses,
   createKeys,
@@ -11,10 +11,10 @@ import { logger } from '../../src/utils/logger';
 
 // Mock the api module
 jest.mock('../../src/api', () => ({
-  api: jest.fn(),
+  internalApi: jest.fn(),
 }));
 
-const mockApi = api as jest.MockedFunction<typeof api>;
+const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
 describe('Transaction API', () => {
   const accessToken = 'test-token';
@@ -35,12 +35,9 @@ describe('Transaction API', () => {
 
       const result = await getAddresses(accessToken);
 
-      expect(mockApi).toHaveBeenCalledWith(
-        '/transaction/keys/addresses',
-        'GET',
-        null,
-        { Authorization: `Bearer ${accessToken}` },
-      );
+      expect(mockApi).toHaveBeenCalledWith('/transaction/keys/addresses', 'GET', null, {
+        Authorization: `Bearer ${accessToken}`,
+      });
       expect(result).toEqual([
         { address: 'addr1', derivationPath: 'path1', coin: 'EASE' },
         { address: 'addr2', derivationPath: 'path2', coin: 'BTC' },
@@ -76,12 +73,9 @@ describe('Transaction API', () => {
 
       const result = await createKeys(accessToken, mockInput as any);
 
-      expect(mockApi).toHaveBeenCalledWith(
-        `/transaction/keys/create`,
-        'POST',
-        mockInput,
-        { Authorization: `Bearer ${accessToken}` },
-      );
+      expect(mockApi).toHaveBeenCalledWith(`/transaction/keys/create`, 'POST', mockInput, {
+        Authorization: `Bearer ${accessToken}`,
+      });
       expect(result).toEqual(mockResponse);
     });
 
@@ -107,12 +101,9 @@ describe('Transaction API', () => {
 
       const result = await createTransaction(accessToken, mockIntent);
 
-      expect(mockApi).toHaveBeenCalledWith(
-        '/transaction/create',
-        'POST',
-        mockIntent,
-        { Authorization: `Bearer ${accessToken}` },
-      );
+      expect(mockApi).toHaveBeenCalledWith('/transaction/create', 'POST', mockIntent, {
+        Authorization: `Bearer ${accessToken}`,
+      });
       expect(result).toEqual(mockResponse);
     });
 
@@ -170,15 +161,10 @@ describe('Transaction API', () => {
 
       const result = await signTransactionCallback(accessToken, mockSessionId, mockInput as any);
 
-      expect(mockApi).toHaveBeenCalledWith(
-        `/transaction/sign/callback`,
-        'POST',
-        mockInput,
-        {
-          'X-Session-Id': mockSessionId,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      );
+      expect(mockApi).toHaveBeenCalledWith(`/transaction/sign/callback`, 'POST', mockInput, {
+        'X-Session-Id': mockSessionId,
+        Authorization: `Bearer ${accessToken}`,
+      });
       expect(result).toEqual(mockResponse);
     });
 
@@ -186,9 +172,7 @@ describe('Transaction API', () => {
       const apiError = new APIError('Failed to sign callback', 403);
       mockApi.mockResolvedValueOnce({ success: false, error: apiError });
 
-      await expect(signTransactionCallback(accessToken, mockSessionId, mockInput as any)).rejects.toThrow(
-        EaseSDKError,
-      );
+      await expect(signTransactionCallback(accessToken, mockSessionId, mockInput as any)).rejects.toThrow(EaseSDKError);
     });
   });
 });

@@ -1,6 +1,7 @@
-import { api } from '../api';
+import { internalApi as api } from '../api';
 import { APIDefaultResponse, JoinResponse, OptionsResp, PublicKeyCredential } from '../utils/type';
 import { logger } from '../utils/logger';
+import { telemetry } from '../telemetry';
 import {
   AuthenticationError,
   WebAuthnError,
@@ -85,6 +86,12 @@ export async function join(accessToken: string): Promise<JoinResponse> {
       hasPublicKey: !!publicKey,
     });
 
+    telemetry.trackEvent('join_success', {
+      tokenPrefix: accessToken.substring(0, 8) + '***',
+      sessionId: sessionId?.substring(0, 8) + '***' || 'none',
+      hasPublicKey: !!publicKey,
+    });
+
     return {
       publicKey,
       sessionId: sessionId || '',
@@ -95,6 +102,11 @@ export async function join(accessToken: string): Promise<JoinResponse> {
     }
 
     const enhancedError = handleUnknownError(error, {
+      operation: 'join',
+      tokenPrefix: accessToken.substring(0, 8),
+    });
+
+    telemetry.trackError(enhancedError, {
       operation: 'join',
       tokenPrefix: accessToken.substring(0, 8),
     });

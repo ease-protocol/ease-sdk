@@ -1,9 +1,12 @@
 import { join, joinCallback } from '../src/join';
-import { api } from '../src/api';
+import { internalApi } from '../src/api';
 import { ValidationError, AuthenticationError, WebAuthnError, ErrorCode } from '../src/utils/errors';
 
-jest.mock('../src/api');
-const mockApi = api as jest.MockedFunction<typeof api>;
+jest.mock('../src/api', () => ({
+  internalApi: jest.fn(),
+}));
+
+const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
 describe('Join Module', () => {
   beforeEach(() => {

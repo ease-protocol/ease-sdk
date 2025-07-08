@@ -1,9 +1,12 @@
 import { login, loginCallback } from '../src/login';
-import { api } from '../src/api';
+import { internalApi } from '../src/api';
 import { AuthenticationError, WebAuthnError, ValidationError, ErrorCode } from '../src/utils/errors';
 
-jest.mock('../src/api');
-const mockApi = api as jest.MockedFunction<typeof api>;
+jest.mock('../src/api', () => ({
+  internalApi: jest.fn(),
+}));
+
+const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
 describe('Login Module', () => {
   beforeEach(() => {
@@ -118,9 +121,15 @@ describe('Login Module', () => {
       expect(result.success).toBe(true);
       expect(result.accessToken).toBe('access-token');
       expect(result.refreshToken).toBe('refresh-token');
-      expect(mockApi).toHaveBeenCalledWith('/login/callback', 'POST', mockCredential, {
-        'X-Session-Id': validSessionId,
-      }, false);
+      expect(mockApi).toHaveBeenCalledWith(
+        '/login/callback',
+        'POST',
+        mockCredential,
+        {
+          'X-Session-Id': validSessionId,
+        },
+        false,
+      );
     });
 
     it('should validate required inputs', async () => {

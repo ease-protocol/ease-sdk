@@ -1,9 +1,12 @@
 import { refreshToken } from '../src/refresh';
-import { api } from '../src/api';
+import { internalApi } from '../src/api';
 import { AuthenticationError, ValidationError } from '../src/utils/errors';
 
-jest.mock('../src/api');
-const mockApi = api as jest.MockedFunction<typeof api>;
+jest.mock('../src/api', () => ({
+  internalApi: jest.fn(),
+}));
+
+const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
 describe('refreshToken', () => {
   beforeEach(() => {

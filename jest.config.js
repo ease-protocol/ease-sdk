@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   collectCoverage: false,
@@ -16,6 +16,10 @@ export default {
     '^.+\\.ts$': 'ts-jest',
     '^.+\\.js$': 'babel-jest',
   },
-  transformIgnorePatterns: ['/node_modules/(?!cbor2)/'],
+  transformIgnorePatterns: ['/node_modules/(?!(cbor2|@sentry/react-native|react-native)/)'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  moduleNameMapper: {
+    '^react-native$': '<rootDir>/__mocks__/react-native.js',
+  },
 };
