@@ -8,11 +8,15 @@ import {
 } from '../src/wallet';
 import { EaseSDKError, ErrorCode } from '../src/utils/errors';
 import { logger } from '../src/utils/logger';
-import { api } from '../src/api';
+import { internalApi } from '../src/api/index';
+import { fetchExternalBlockchainData } from '../src/api/externalApi';
 
-// Mock the api module
-jest.mock('../src/api', () => ({
-  api: jest.fn(),
+jest.mock('../src/api/index', () => ({
+  internalApi: jest.fn(),
+}));
+
+jest.mock('../src/api/externalApi', () => ({
+  fetchExternalBlockchainData: jest.fn(),
 }));
 
 const mockFetch = jest.fn();
@@ -29,7 +33,8 @@ jest.mock('../src/utils/logger', () => ({
   },
 }));
 
-const mockApi = api as jest.MockedFunction<typeof api>;
+const mockInternalApi = internalApi as jest.MockedFunction<typeof internalApi>;
+const mockFetchExternalBlockchainData = fetchExternalBlockchainData as jest.MockedFunction<typeof fetchExternalBlockchainData>;
 
 describe('wallet', () => {
   beforeEach(() => {
@@ -137,62 +142,38 @@ describe('wallet', () => {
     });
 
     it('should get EASE wallet balance', async () => {
-      mockApi.mockResolvedValueOnce({ success: true, data: ['10.0000 EASE'] });
+      mockFetchExternalBlockchainData.mockResolvedValueOnce('10.0000');
       const balance = await getWalletBalance('EASE', 'testAddress');
       expect(balance).toBe('10.0000');
-      expect(mockApi).toHaveBeenCalledWith('/v1/chain/get_currency_balance', 'POST', {
-        account: 'testAddress',
-        code: 'eosio.token',
-        symbol: 'EASE',
-      }, undefined, true);
+      expect(mockFetchExternalBlockchainData).toHaveBeenCalledWith('EASE', 'testAddress', 'balance');
     });
 
     it('should get BTC wallet balance', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () => Promise.resolve({ chain_stats: { funded_txo_sum: 200000000, spent_txo_sum: 100000000 } }),
-      } as Response);
+      mockFetchExternalBlockchainData.mockResolvedValueOnce('1.00000000');
       const balance = await getWalletBalance('BTC', 'testAddress');
       expect(balance).toBe('1.00000000');
-      expect(mockFetch).toHaveBeenCalledWith('https://mempool.space/testnet/api/address/testAddress');
+      expect(mockFetchExternalBlockchainData).toHaveBeenCalledWith('BTC', 'testAddress', 'balance');
     });
 
     it('should get ETH wallet balance', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () => Promise.resolve({ result: '1000000000000000000' }),
-      } as Response);
+      mockFetchExternalBlockchainData.mockResolvedValueOnce('1.00000000');
       const balance = await getWalletBalance('ETH', 'testAddress');
       expect(balance).toBe('1.00000000');
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('https://api-sepolia.etherscan.io/api'));
+      expect(mockFetchExternalBlockchainData).toHaveBeenCalledWith('ETH', 'testAddress', 'balance');
     });
 
     it('should throw NetworkError on API failure for getWalletBalance', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Failed to fetch'));
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.NETWORK_ERROR, message: 'Failed to fetch' }));
       await expect(getWalletBalance('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
     it('should throw APIError on non-ok response for getWalletBalance', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        statusText: 'Bad Request',
-        json: () => Promise.resolve({}),
-      } as Response);
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Bad Request' }));
       await expect(getWalletBalance('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
     it('should throw APIError on 500 response for getWalletBalance', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
-        json: () => Promise.resolve({}),
-      } as Response);
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Internal Server Error' }));
       await expect(getWalletBalance('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
@@ -204,7 +185,7 @@ describe('wallet', () => {
 
   describe('getWalletHistory', () => {
     it('should get EASE wallet history', async () => {
-      mockApi.mockResolvedValueOnce({
+      mockInternalApi.mockResolvedValueOnce({
         success: true,
         data: {
           actions: [
@@ -224,72 +205,48 @@ describe('wallet', () => {
         { id: 'trx1', type: 'in', amount: '5.0000', explorerURL: '' },
         { id: 'trx2', type: 'out', amount: '2.0000', explorerURL: '' },
       ]);
-      expect(mockApi).toHaveBeenCalledWith('/v2/history/get_actions', 'GET', {
+      expect(mockInternalApi).toHaveBeenCalledWith('/v2/history/get_actions', 'GET', {
         account: 'testAddress', limit: 20 }, undefined, true);
     });
 
     it('should get BTC wallet history', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () =>
-          Promise.resolve([
-            { txid: 'btc_trx1', vout: [{ scriptpubkey_address: 'testAddress', value: 100000000 }], vin: [] },
-            { txid: 'btc_trx2', vout: [], vin: [{ prevout: { scriptpubkey_address: 'testAddress', value: 50000000 } }] },
-          ]),
-      } as Response);
+      mockFetchExternalBlockchainData.mockResolvedValueOnce([
+        { id: 'btc_trx1', type: 'in', amount: '1.00000000', explorerURL: 'https://mempool.space/testnet/tx/btc_trx1' },
+        { id: 'btc_trx2', type: 'out', amount: '0.50000000', explorerURL: 'https://mempool.space/testnet/tx/btc_trx2' },
+      ]);
       const history = await getWalletHistory('BTC', 'testAddress');
       expect(history).toEqual([
         { id: 'btc_trx1', type: 'in', amount: '1.00000000', explorerURL: 'https://mempool.space/testnet/tx/btc_trx1' },
         { id: 'btc_trx2', type: 'out', amount: '0.50000000', explorerURL: 'https://mempool.space/testnet/tx/btc_trx2' },
       ]);
-      expect(mockFetch).toHaveBeenCalledWith('https://mempool.space/testnet/api/address/testAddress/txs');
+      expect(mockFetchExternalBlockchainData).toHaveBeenCalledWith('BTC', 'testAddress', 'history');
     });
 
     it('should get ETH wallet history', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () =>
-          Promise.resolve({
-            result: [
-              { hash: 'eth_trx1', to: 'testAddress', value: '2000000000000000000' },
-              { hash: 'eth_trx2', to: 'otherAddress', value: '1000000000000000000' },
-            ],
-          }),
-      } as Response);
+      mockFetchExternalBlockchainData.mockResolvedValueOnce([
+        { id: 'eth_trx1', type: 'in', amount: '2.00000000', explorerURL: 'https://sepolia.etherscan.io/tx/eth_trx1' },
+        { id: 'eth_trx2', type: 'out', amount: '1.00000000', explorerURL: 'https://sepolia.etherscan.io/tx/eth_trx2' },
+      ]);
       const history = await getWalletHistory('ETH', 'testAddress');
       expect(history).toEqual([
         { id: 'eth_trx1', type: 'in', amount: '2.00000000', explorerURL: 'https://sepolia.etherscan.io/tx/eth_trx1' },
         { id: 'eth_trx2', type: 'out', amount: '1.00000000', explorerURL: 'https://sepolia.etherscan.io/tx/eth_trx2' },
       ]);
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('https://api-sepolia.etherscan.io/api'));
+      expect(mockFetchExternalBlockchainData).toHaveBeenCalledWith('ETH', 'testAddress', 'history');
     });
 
     it('should throw NetworkError on API failure for getWalletHistory', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Failed to fetch'));
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.NETWORK_ERROR, message: 'Failed to fetch' }));
       await expect(getWalletHistory('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
     it('should throw APIError on non-ok response for getWalletHistory', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
-        json: () => Promise.resolve({}),
-      } as Response);
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Internal Server Error' }));
       await expect(getWalletHistory('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
     it('should throw APIError on 404 response for getWalletHistory', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        statusText: 'Not Found',
-        json: () => Promise.resolve({}),
-      } as Response);
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Not Found', statusCode: 404 }));
       await expect(getWalletHistory('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 

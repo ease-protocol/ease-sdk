@@ -1,9 +1,10 @@
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { Transaction } from '../utils/type'; // Assuming Transaction type is already defined in type.ts
-import { api } from '../api';
+import { internalApi } from '../api';
+import { fetchExternalBlockchainData } from '../api/externalApi';
 
-const ETHERSCAN_API_KEY = '82S5SBUBPCKY3PTUX3DP6HDAHTNP1UEJVZ';
+
 
 export function truncateAddress(address: string): string {
   if (typeof address !== 'string') {
@@ -85,74 +86,21 @@ export async function getWalletBalance(coin: string, address: string): Promise<s
 
     switch (coin.toUpperCase()) {
       case 'EASE': {
-        const res = await fetch('https://testnet.ease.tech/v1/chain/get_currency_balance',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              account: address,
-              code: 'eosio.token',
-              symbol: 'EASE'
-            })
-          });
-        if (!res.ok) {
-          logger.error(
-            `EASE balance request failed for address: ${address}. Error: ${res.statusText || 'Unknown error'}`,
-            { status: res.status },
-          );
-          throw new EaseSDKError({ code: ErrorCode.API_ERROR, message: `EASE balance request failed: ${res.statusText}` });
-        }
-        const responseBody = await res.json();
-        data = responseBody;
-        if (!Array.isArray(data) || data.length === 0) {
-          logger.warn(`EASE balance API returned empty or non-array result for address: ${address}.`, { data });
-          return '0';
-        }
-        logger.info(`Successfully retrieved EASE balance for address: ${address}. Balance: ${data[0].split(' ')[0]}`);
-        return data[0].split(' ')[0];
+        const balance = await fetchExternalBlockchainData<string>('EASE', address, 'balance');
+        logger.info(`Successfully retrieved EASE balance for address: ${address}. Balance: ${balance}`);
+        return balance;
       }
 
       case 'BTC': {
-        const response = await fetch(`https://mempool.space/testnet/api/address/${address}`);
-        if (!response.ok) {
-          throw new EaseSDKError({
-            code: ErrorCode.API_ERROR,
-            message: `BTC balance request failed: ${response.statusText}`,
-            statusCode: response.status,
-          });
-        }
-        data = await response.json();
-        if (!data || typeof data.chain_stats !== 'object') {
-          logger.warn(`BTC balance API returned invalid data structure for address: ${address}.`, { data });
-          return '0';
-        }
-        const sats = data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum;
-        logger.info(`Successfully retrieved BTC balance for address: ${address}. Balance: ${(sats / 1e8).toFixed(8)}`);
-        return (sats / 1e8).toFixed(8); // satoshis to BTC
+        const balance = await fetchExternalBlockchainData<string>('BTC', address, 'balance');
+        logger.info(`Successfully retrieved BTC balance for address: ${address}. Balance: ${balance}`);
+        return balance;
       }
 
       case 'ETH': {
-        const response = await fetch(
-          `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`,
-        );
-        if (!response.ok) {
-          throw new EaseSDKError({
-            code: ErrorCode.API_ERROR,
-            message: `ETH balance request failed: ${response.statusText}`,
-            statusCode: response.status,
-          });
-        }
-        data = await response.json();
-        if (!data || typeof data.result === 'undefined') {
-          logger.warn(`ETH balance API returned invalid data structure for address: ${address}.`, { data });
-          return '0';
-        }
-        logger.info(
-          `Successfully retrieved ETH balance for address: ${address}. Balance: ${(Number(data.result) / 1e18).toFixed(8)}`,
-        );
-        return (Number(data.result) / 1e18).toFixed(8); // wei to ETH
+        const balance = await fetchExternalBlockchainData<string>('ETH', address, 'balance');
+        logger.info(`Successfully retrieved ETH balance for address: ${address}. Balance: ${balance}`);
+        return balance;
       }
 
       default:
@@ -177,7 +125,7 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
 
     switch (coin.toUpperCase()) {
       case 'EASE': {
-        const res = await api('/v2/history/get_actions', 'GET', { account: address, limit: 20 }, undefined, true);
+        const res = await internalApi(`/v2/history/get_actions`, 'GET', { account: address, limit: 20 }, undefined, true);
         if (!res.success || !res.data) {
           logger.error(
             `EASE history request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
@@ -214,62 +162,15 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
       }
 
       case 'BTC': {
-        const response = await fetch(`https://mempool.space/testnet/api/address/${address}/txs`);
-        if (!response.ok) {
-          throw new EaseSDKError({
-            code: ErrorCode.API_ERROR,
-            message: `BTC history request failed: ${response.statusText}`,
-            statusCode: response.status,
-          });
-        }
-        const txs = Array.isArray(await response.json()) ? await response.json() : [];
+        const txs = await fetchExternalBlockchainData<Transaction[]>('BTC', address, 'history');
         logger.info(`Successfully retrieved BTC history for address: ${address}. Found ${txs.length} transactions.`);
-        return txs.map((tx: any) => {
-          const isIncoming = tx.vout.some((v: any) => v.scriptpubkey_address === address);
-          const amountSats = isIncoming
-            ? tx.vout.find((v: any) => v.scriptpubkey_address === address)?.value || 0
-            : tx.vin.find((v: any) => v.prevout?.scriptpubkey_address === address)?.prevout?.value || 0;
-
-          return {
-            id: tx.txid,
-            type: isIncoming ? 'in' : 'out',
-            amount: (amountSats / 1e8).toFixed(8),
-            explorerURL: `https://mempool.space/testnet/tx/${tx.txid}`,
-          };
-        });
+        return txs;
       }
 
       case 'ETH': {
-        const response = await fetch(
-          `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&sort=desc&apikey=${ETHERSCAN_API_KEY}`,
-        );
-        if (!response.ok) {
-          throw new EaseSDKError({
-            code: ErrorCode.API_ERROR,
-            message: `ETH history request failed: ${response.statusText}`,
-            statusCode: response.status,
-          });
-        }
-        data = await response.json();
-
-        if (!Array.isArray(data.result)) {
-          logger.warn(`Etherscan API returned non-array result for transaction history for address: ${address}.`, {
-            data,
-          });
-          return [];
-        }
-        logger.info(
-          `Successfully retrieved ETH history for address: ${address}. Found ${data.result.length} transactions.`,
-        );
-        return data.result.map((tx: any) => {
-          const type = tx.to?.toLowerCase() === address.toLowerCase() ? 'in' : 'out';
-          return {
-            id: tx.hash,
-            type,
-            amount: (Number(tx.value) / 1e18).toFixed(8),
-            explorerURL: `https://sepolia.etherscan.io/tx/${tx.hash}`,
-          };
-        });
+        const txs = await fetchExternalBlockchainData<Transaction[]>('ETH', address, 'history');
+        logger.info(`Successfully retrieved ETH history for address: ${address}. Found ${txs.length} transactions.`);
+        return txs;
       }
 
       default:

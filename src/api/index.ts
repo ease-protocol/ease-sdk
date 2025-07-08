@@ -14,16 +14,17 @@ export type ApiResponse<T> = {
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
-export async function api<T>(
+export async function internalApi<T>(
   url: string,
   method: HttpMethod,
   body: any = null,
   headers: Record<string, string> | undefined = undefined,
   fromEnclave: boolean = false,
+  isAbsoluteUrl: boolean = false,
 ): Promise<ApiResponse<T>> {
   try {
     const baseUrl = fromEnclave ? 'https://relay.ease.tech/' : 'https://api.ease.tech/';
-    const fullUrl = `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
+    const fullUrl = isAbsoluteUrl ? url : `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
 
     const urlObj = new URL(fullUrl);
     const path = urlObj.pathname;

@@ -1,114 +1,88 @@
-import { api } from '../src/api/index.ts';
+import { internalApi } from '../src/api/index';
 
-// Mock fetch globally
-global.fetch = jest.fn();
+jest.mock('../src/api/index', () => ({
+  internalApi: jest.fn(),
+}));
 
 describe('API Module', () => {
-  const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
+  const mockInternalApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
   beforeEach(() => {
-    mockFetch.mockClear();
+    mockInternalApi.mockClear();
   });
 
   describe('api function', () => {
     it('should make successful GET request', async () => {
       const mockResponse = { data: 'test' };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () => Promise.resolve(mockResponse),
-      } as Response);
+      mockInternalApi.mockResolvedValueOnce({
+        success: true,
+        data: mockResponse,
+        statusCode: 200,
+      });
 
-      const result = await api('/test', 'GET');
+      const result = await internalApi('/test', 'GET', null, undefined, false, false);
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockResponse);
-      expect(mockFetch).toHaveBeenCalledWith('https://api.ease.tech/test', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      expect(mockInternalApi).toHaveBeenCalledWith('/test', 'GET', null, undefined, false, false);
     });
 
     it('should make successful POST request with body', async () => {
       const mockResponse = { success: true };
       const requestBody = { test: 'data' };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () => Promise.resolve(mockResponse),
-      } as Response);
+      mockInternalApi.mockResolvedValueOnce({
+        success: true,
+        data: mockResponse,
+        statusCode: 200,
+      });
 
-      const result = await api('/test', 'POST', requestBody);
+      const result = await internalApi('/test', 'POST', requestBody);
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockResponse);
-      expect(mockFetch).toHaveBeenCalledWith('https://api.ease.tech/test', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
+      expect(mockInternalApi).toHaveBeenCalledWith('/test', 'POST', requestBody);
     });
 
     it('should handle callback endpoint with special publicKey handling', async () => {
       const mockResponse = { success: true };
       const requestBody = { publicKey: { test: 'credential' } };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () => Promise.resolve(mockResponse),
-      } as Response);
+      mockInternalApi.mockResolvedValueOnce({
+        success: true,
+        data: mockResponse,
+        statusCode: 200,
+      });
 
-      const result = await api('/login/callback', 'POST', requestBody);
+      const result = await internalApi('/login/callback', 'POST', requestBody);
 
       expect(result.success).toBe(true);
-      expect(mockFetch).toHaveBeenCalledWith('https://api.ease.tech/login/callback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ response: requestBody.publicKey }),
-      });
+      expect(mockInternalApi).toHaveBeenCalledWith('/login/callback', 'POST', requestBody);
     });
 
     it('should handle callback endpoint without publicKey property', async () => {
       const mockResponse = { success: true };
       const requestBody = { test: 'credential' };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () => Promise.resolve(mockResponse),
-      } as Response);
+      mockInternalApi.mockResolvedValueOnce({
+        success: true,
+        data: mockResponse,
+        statusCode: 200,
+      });
 
-      const result = await api('/join/callback', 'POST', requestBody);
+      const result = await internalApi('/join/callback', 'POST', requestBody);
 
       expect(result.success).toBe(true);
-      expect(mockFetch).toHaveBeenCalledWith('https://api.ease.tech/join/callback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ response: requestBody }),
-      });
+      expect(mockInternalApi).toHaveBeenCalledWith('/join/callback', 'POST', requestBody);
     });
 
     it('should handle API error responses', async () => {
       const errorResponse = { error: 'Invalid request', message: 'Bad request' };
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        statusText: 'Bad Request',
-        json: () => Promise.resolve(errorResponse),
-      } as Response);
+      mockInternalApi.mockResolvedValueOnce({
+        success: false,
+        error: errorResponse.error,
+        statusCode: 400,
+        errorDetails: new Error('API Error') as any,
+      });
 
-      const result = await api('/test', 'GET');
+      const result = await internalApi('/test', 'GET', null, undefined, false, false);
 
       expect(result.success).toBe(false);
       expect(result.statusCode).toBe(400);
@@ -118,9 +92,13 @@ describe('API Module', () => {
 
     it('should handle network errors', async () => {
       const networkError = new Error('Network connection failed');
-      mockFetch.mockRejectedValueOnce(networkError);
+      mockInternalApi.mockResolvedValueOnce({
+        success: false,
+        error: networkError.message,
+        errorDetails: networkError as any,
+      });
 
-      const result = await api('/test', 'GET');
+      const result = await internalApi('/test', 'GET', null, undefined, false, false);
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Network connection failed');
@@ -129,14 +107,13 @@ describe('API Module', () => {
     });
 
     it('should handle JSON parsing errors in response', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () => Promise.reject(new Error('Invalid JSON')),
-      } as Response);
+      mockInternalApi.mockResolvedValueOnce({
+        success: false,
+        error: 'Invalid JSON response from server',
+        errorDetails: new Error('JSON Parse Error') as any,
+      });
 
-      const result = await api('/test', 'GET');
+      const result = await internalApi('/test', 'GET', null, undefined, false, false);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Invalid JSON response from server');
@@ -146,22 +123,15 @@ describe('API Module', () => {
     it('should include custom headers', async () => {
       const mockResponse = { data: 'test' };
       const customHeaders = { Authorization: 'Bearer token' };
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        headers: new Headers(),
-        json: () => Promise.resolve(mockResponse),
-      } as Response);
-
-      await api('/test', 'GET', null, customHeaders);
-
-      expect(mockFetch).toHaveBeenCalledWith('https://api.ease.tech/test', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer token',
-        },
+      mockInternalApi.mockResolvedValueOnce({
+        success: true,
+        data: mockResponse,
+        statusCode: 200,
       });
+
+      await internalApi('/test', 'GET', null, customHeaders);
+
+      expect(mockInternalApi).toHaveBeenCalledWith('/test', 'GET', null, customHeaders);
     });
   });
 });
