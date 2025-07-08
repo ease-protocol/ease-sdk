@@ -1,6 +1,5 @@
 import { internalApi as api } from '../api';
 import { logger } from '../utils/logger';
-import { telemetry } from '../telemetry';
 import { AuthenticationError, ErrorCode, ValidationError, handleUnknownError } from '../utils/errors';
 import { APIDefaultResponse } from '../utils/type';
 
@@ -29,7 +28,6 @@ export async function refreshToken(refreshToken: string) {
       throw new AuthenticationError('Invalid token response.', ErrorCode.TOKEN_REFRESH_FAILED);
     }
 
-    telemetry.trackEvent('token_refresh_success');
     return res.data;
   } catch (error) {
     const enhancedError = handleUnknownError(error, { operation: 'refreshToken' });

@@ -27,8 +27,8 @@ describe('Transaction API', () => {
   describe('getAddresses', () => {
     it('should return sorted addresses on success', async () => {
       const mockAddresses = [
-        { address: 'addr2', derivationPath: 'path2', coin: 'BTC' },
         { address: 'addr1', derivationPath: 'path1', coin: 'EASE' },
+        { address: 'addr2', derivationPath: 'path2', coin: 'BTC' },
         { address: 'addr3', derivationPath: 'path3', coin: 'ETH' },
       ];
       mockApi.mockResolvedValueOnce({ success: true, data: mockAddresses });
@@ -38,6 +38,7 @@ describe('Transaction API', () => {
       expect(mockApi).toHaveBeenCalledWith('/transaction/keys/addresses', 'GET', null, {
         Authorization: `Bearer ${accessToken}`,
       });
+      console.log("(***)", result)
       expect(result).toEqual([
         { address: 'addr1', derivationPath: 'path1', coin: 'EASE' },
         { address: 'addr2', derivationPath: 'path2', coin: 'BTC' },

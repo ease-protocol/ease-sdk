@@ -1,7 +1,6 @@
 import { internalApi as api } from '../api';
 import { APIDefaultResponse, JoinResponse, OptionsResp, PublicKeyCredential } from '../utils/type';
 import { logger } from '../utils/logger';
-import { telemetry } from '../telemetry';
 import {
   AuthenticationError,
   WebAuthnError,
@@ -81,12 +80,6 @@ export async function join(accessToken: string): Promise<JoinResponse> {
     }
 
     logger.debug('Join options retrieved successfully:', {
-      tokenPrefix: accessToken.substring(0, 8) + '***',
-      sessionId: sessionId?.substring(0, 8) + '***' || 'none',
-      hasPublicKey: !!publicKey,
-    });
-
-    telemetry.trackEvent('join_success', {
       tokenPrefix: accessToken.substring(0, 8) + '***',
       sessionId: sessionId?.substring(0, 8) + '***' || 'none',
       hasPublicKey: !!publicKey,

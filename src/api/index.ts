@@ -1,5 +1,4 @@
 import { logger } from '../utils/logger';
-import { telemetry } from '../telemetry';
 import { NetworkError, createErrorFromAPIResponse, handleUnknownError } from '../utils/errors';
 
 import type { EaseSDKError } from '../utils/errors';
@@ -98,12 +97,6 @@ export async function internalApi<T>(
         status: response.status,
       });
     }
-
-    telemetry.trackEvent('api_call_success', {
-      url: path,
-      method,
-      statusCode: response.status,
-    });
 
     return {
       success: true,

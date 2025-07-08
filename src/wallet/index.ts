@@ -3,7 +3,6 @@ import { logger } from '../utils/logger';
 import { Transaction } from '../utils/type'; // Assuming Transaction type is already defined in type.ts
 import { internalApi } from '../api';
 import { fetchExternalBlockchainData } from '../api/externalApi';
-import { telemetry } from '../telemetry';
 
 export function truncateAddress(address: string): string {
   if (typeof address !== 'string') {
@@ -86,21 +85,18 @@ export async function getWalletBalance(coin: string, address: string): Promise<s
       case 'EASE': {
         const balance = await fetchExternalBlockchainData<string>('EASE', address, 'balance');
         logger.info(`Successfully retrieved EASE balance for address: ${address}. Balance: ${balance}`);
-        telemetry.trackEvent('get_wallet_balance_success', { coin, address: truncateAddress(address), balance });
         return balance;
       }
 
       case 'BTC': {
         const balance = await fetchExternalBlockchainData<string>('BTC', address, 'balance');
         logger.info(`Successfully retrieved BTC balance for address: ${address}. Balance: ${balance}`);
-        telemetry.trackEvent('get_wallet_balance_success', { coin, address: truncateAddress(address), balance });
         return balance;
       }
 
       case 'ETH': {
         const balance = await fetchExternalBlockchainData<string>('ETH', address, 'balance');
         logger.info(`Successfully retrieved ETH balance for address: ${address}. Balance: ${balance}`);
-        telemetry.trackEvent('get_wallet_balance_success', { coin, address: truncateAddress(address), balance });
         return balance;
       }
 
@@ -109,7 +105,6 @@ export async function getWalletBalance(coin: string, address: string): Promise<s
     }
   } catch (error: unknown) {
     const enhancedError = handleUnknownError(error, { coin, address, operation: 'getWalletBalance' });
-    telemetry.trackError(enhancedError, { coin, address: truncateAddress(address), operation: 'getWalletBalance' });
     throw enhancedError;
   }
 }
