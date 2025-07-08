@@ -20,7 +20,7 @@ export async function internalApi<T>(
   body: any = null,
   headers: Record<string, string> | undefined = undefined,
   fromEnclave: boolean = false,
-  isAbsoluteUrl: boolean = false,
+  isAbsoluteUrl: boolean = false
 ): Promise<ApiResponse<T>> {
   let path: string = ''; // Initialize path here
   try {

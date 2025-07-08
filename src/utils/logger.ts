@@ -1,3 +1,4 @@
+const { version } = require('../../package.json');
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -15,7 +16,7 @@ export interface LoggerConfig {
 class Logger {
   private config: LoggerConfig = {
     level: LogLevel.DEBUG,
-    prefix: '[ease-sdk]',
+    prefix: `[ease-sdk@${version}]`,
   };
 
   configure(config: Partial<LoggerConfig>): void {
