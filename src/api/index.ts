@@ -20,9 +20,13 @@ export async function internalApi<T>(
   body: any = null,
   headers: Record<string, string> | undefined = undefined,
   fromEnclave: boolean = false,
-  isAbsoluteUrl: boolean = false
+  isAbsoluteUrl: boolean = false,
+  timeout: number = 5000,
 ): Promise<ApiResponse<T>> {
   let path: string = ''; // Initialize path here
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
   try {
     const baseUrl = fromEnclave ? 'https://relay.ease.tech/' : 'https://api.ease.tech/';
     const fullUrl = isAbsoluteUrl ? url : `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
@@ -36,6 +40,7 @@ export async function internalApi<T>(
         'Content-Type': 'application/json',
         ...headers,
       },
+      signal: controller.signal,
     };
 
     if (body !== null && method !== 'GET' && method !== 'HEAD') {
@@ -104,6 +109,19 @@ export async function internalApi<T>(
       headers: response.headers,
     };
   } catch (error: any) {
+    if (error.name === 'AbortError') {
+      logger.error('Network request timed out:', {
+        url,
+        method,
+        timeout,
+      });
+      return {
+        success: false,
+        error: 'Request timed out',
+        errorDetails: new NetworkError('Request timed out', error, { url, method }),
+      };
+    }
+
     logger.error('Network request failed:', {
       url,
       method,
@@ -113,12 +131,12 @@ export async function internalApi<T>(
 
     const networkError = handleUnknownError(error, { url, method });
 
-    
-
     return {
       success: false,
       error: networkError.message,
       errorDetails: networkError,
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
