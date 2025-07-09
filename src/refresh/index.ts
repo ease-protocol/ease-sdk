@@ -31,7 +31,7 @@ export async function refreshToken(refreshToken: string) {
     return res.data;
   } catch (error) {
     const enhancedError = handleUnknownError(error, { operation: 'refreshToken' });
-    
+
     logger.error('An unexpected error occurred during token refresh:', enhancedError);
     if (enhancedError instanceof AuthenticationError) {
       throw enhancedError;

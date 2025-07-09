@@ -34,7 +34,9 @@ jest.mock('../src/utils/logger', () => ({
 }));
 
 const mockInternalApi = internalApi as jest.MockedFunction<typeof internalApi>;
-const mockFetchExternalBlockchainData = fetchExternalBlockchainData as jest.MockedFunction<typeof fetchExternalBlockchainData>;
+const mockFetchExternalBlockchainData = fetchExternalBlockchainData as jest.MockedFunction<
+  typeof fetchExternalBlockchainData
+>;
 
 describe('wallet', () => {
   beforeEach(() => {
@@ -163,17 +165,23 @@ describe('wallet', () => {
     });
 
     it('should throw NetworkError on API failure for getWalletBalance', async () => {
-      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.NETWORK_ERROR, message: 'Failed to fetch' }));
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(
+        new EaseSDKError({ code: ErrorCode.NETWORK_ERROR, message: 'Failed to fetch' }),
+      );
       await expect(getWalletBalance('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
     it('should throw APIError on non-ok response for getWalletBalance', async () => {
-      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Bad Request' }));
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(
+        new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Bad Request' }),
+      );
       await expect(getWalletBalance('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
     it('should throw APIError on 500 response for getWalletBalance', async () => {
-      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Internal Server Error' }));
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(
+        new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Internal Server Error' }),
+      );
       await expect(getWalletBalance('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
@@ -205,8 +213,16 @@ describe('wallet', () => {
         { id: 'trx1', type: 'in', amount: '5.0000', explorerURL: '' },
         { id: 'trx2', type: 'out', amount: '2.0000', explorerURL: '' },
       ]);
-      expect(mockInternalApi).toHaveBeenCalledWith('/v2/history/get_actions', 'GET', {
-        account: 'testAddress', limit: 20 }, undefined, true);
+      expect(mockInternalApi).toHaveBeenCalledWith(
+        '/v2/history/get_actions',
+        'GET',
+        {
+          account: 'testAddress',
+          limit: 20,
+        },
+        undefined,
+        true,
+      );
     });
 
     it('should get BTC wallet history', async () => {
@@ -236,17 +252,23 @@ describe('wallet', () => {
     });
 
     it('should throw NetworkError on API failure for getWalletHistory', async () => {
-      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.NETWORK_ERROR, message: 'Failed to fetch' }));
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(
+        new EaseSDKError({ code: ErrorCode.NETWORK_ERROR, message: 'Failed to fetch' }),
+      );
       await expect(getWalletHistory('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
     it('should throw APIError on non-ok response for getWalletHistory', async () => {
-      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Internal Server Error' }));
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(
+        new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Internal Server Error' }),
+      );
       await expect(getWalletHistory('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 
     it('should throw APIError on 404 response for getWalletHistory', async () => {
-      mockFetchExternalBlockchainData.mockRejectedValueOnce(new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Not Found', statusCode: 404 }));
+      mockFetchExternalBlockchainData.mockRejectedValueOnce(
+        new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Not Found', statusCode: 404 }),
+      );
       await expect(getWalletHistory('ETH', 'testAddress')).rejects.toThrow(EaseSDKError);
     });
 

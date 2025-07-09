@@ -23,7 +23,7 @@ export async function getAttestation(): Promise<AttestationDocument> {
     return parseAttestationDocument(res.data.document);
   } catch (error) {
     handleUnknownError(error, { api: 'getAttestation', nonce });
-    
+
     throw handleUnknownError(error, { api: 'getAttestation', nonce });
   }
 }

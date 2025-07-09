@@ -50,7 +50,6 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
       });
     }
 
-
     return { success: response.data!.success };
   } catch (error) {
     if (isEaseSDKError(error)) {
@@ -62,7 +61,6 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
       countryCode,
       phonePrefix: phone.substring(0, 3),
     });
-
 
     logger.error('Unexpected error in sendOtp:', enhancedError);
     throw enhancedError;
@@ -163,8 +161,6 @@ export async function verifyOtp(
 
     const { accessToken, refreshToken } = response.data;
 
-    
-
     return {
       success: true,
       accessToken,
@@ -187,4 +183,3 @@ export async function verifyOtp(
     throw enhancedError;
   }
 }
-

@@ -38,7 +38,7 @@ describe('Transaction API', () => {
       expect(mockApi).toHaveBeenCalledWith('/transaction/keys/addresses', 'GET', null, {
         Authorization: `Bearer ${accessToken}`,
       });
-      console.log("(***)", result)
+      console.log('(***)', result);
       expect(result).toEqual([
         { address: 'addr1', derivationPath: 'path1', coin: 'EASE' },
         { address: 'addr2', derivationPath: 'path2', coin: 'BTC' },

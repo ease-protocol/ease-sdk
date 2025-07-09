@@ -66,5 +66,3 @@ export type {
 export interface EaseSDKConfig {
   // No telemetry configuration
 }
-
-

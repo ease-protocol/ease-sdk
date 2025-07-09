@@ -99,8 +99,6 @@ export async function join(accessToken: string): Promise<JoinResponse> {
       tokenPrefix: accessToken.substring(0, 8),
     });
 
-    
-
     logger.error('Unexpected error in join:', enhancedError);
     throw enhancedError;
   }

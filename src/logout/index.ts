@@ -43,8 +43,6 @@ export async function logout(accessToken: string): Promise<void> {
         tokenPrefix: accessToken.substring(0, 8),
       });
     }
-
-    
   } catch (error) {
     if (isEaseSDKError(error)) {
       throw error;

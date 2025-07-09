@@ -2,7 +2,6 @@ import { internalApi, ApiResponse } from './index';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
 
-
 const ETHERSCAN_API_KEY = '82S5SBUBPCKY3PTUX3DP6HDAHTNP1UEJVZ'; // This should ideally be loaded from a secure config
 
 export async function fetchExternalBlockchainData<T>(
@@ -35,7 +34,7 @@ export async function fetchExternalBlockchainData<T>(
             return '0' as T;
           }
           const balance = response.data[0].split(' ')[0];
-          
+
           return balance as T;
         }
         // EASE history is already handled by internalApi directly in wallet/index.ts
@@ -82,6 +81,7 @@ export async function fetchExternalBlockchainData<T>(
         if (action === 'balance') {
           url = `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`;
           response = await internalApi(url, method, body, undefined, false, true);
+          logger.debug(`ETH balance API response for address ${coin}:`, JSON.stringify(response));
           if (!response.success || typeof response.data?.result === 'undefined') {
             logger.warn(`ETH balance API returned invalid data structure for address: ${address}.`, {
               data: response.data,

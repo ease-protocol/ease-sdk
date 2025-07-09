@@ -151,7 +151,7 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
         logger.info(
           `Successfully retrieved EASE history for address: ${address}. Found ${data.actions.length} actions.`,
         );
-        
+
         return data.actions
           .filter((a: any) => a.act?.account === 'eosio.token' && a.act?.name === 'transfer')
           .map((action: any) => {
@@ -175,7 +175,7 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
       case 'ETH': {
         const txs = await fetchExternalBlockchainData<Transaction[]>('ETH', address, 'history');
         logger.info(`Successfully retrieved ETH history for address: ${address}. Found ${txs.length} transactions.`);
-        
+
         return txs;
       }
 
@@ -184,7 +184,7 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
     }
   } catch (error: unknown) {
     const enhancedError = handleUnknownError(error, { coin, address, operation: 'getWalletHistory' });
-    
+
     throw enhancedError;
   }
 }

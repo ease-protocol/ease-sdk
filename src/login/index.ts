@@ -60,8 +60,6 @@ export async function login(): Promise<LoginResp> {
       operation: 'login',
     });
 
-   
-
     logger.error('Unexpected error in login:', enhancedError);
     throw enhancedError;
   }
@@ -154,8 +152,6 @@ export async function loginCallback(credential: PublicKeyCredential, sessionId: 
       sessionId: sessionId.substring(0, 8),
       credentialId: credential.id?.substring(0, 8),
     });
-
-    
 
     logger.error('Unexpected error in loginCallback:', enhancedError);
     throw enhancedError;

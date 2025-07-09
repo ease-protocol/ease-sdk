@@ -1,6 +1,6 @@
 **@ease-protocol/ease-sdk**
 
-***
+---
 
 # EASE SDK
 

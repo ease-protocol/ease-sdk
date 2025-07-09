@@ -8,11 +8,14 @@ interface RetryOptions {
   retryableStatusCodes?: number[];
 }
 
-export async function retry<T>(
-  fn: () => Promise<T>,
-  options?: RetryOptions,
-): Promise<T> {
-  const { retries = 3, delay = 1000, factor = 2, maxDelay = 30000, retryableStatusCodes = [429, 500, 502, 503, 504] } = options || {};
+export async function retry<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<T> {
+  const {
+    retries = 3,
+    delay = 1000,
+    factor = 2,
+    maxDelay = 30000,
+    retryableStatusCodes = [429, 500, 502, 503, 504],
+  } = options || {};
 
   let currentDelay = delay;
   for (let i = 0; i <= retries; i++) {

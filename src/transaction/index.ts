@@ -35,7 +35,7 @@ export async function getAddresses(accessToken: string): Promise<Address[]> {
       throw new EaseSDKError({ code: ErrorCode.API_ERROR, message: 'Invalid data format for addresses.' });
     }
     logger.info('Successfully fetched addresses.');
-    
+
     return res.data;
   } catch (error) {
     const enhancedError = handleUnknownError(error, { api: 'getAddresses' });
@@ -156,7 +156,7 @@ export async function signTransactionCallback(
     return res.data;
   } catch (error) {
     const enhancedError = handleUnknownError(error, { api: 'signTransactionCallback', sessionId, input });
-    
+
     throw enhancedError;
   }
 }
