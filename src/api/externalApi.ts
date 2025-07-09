@@ -1,6 +1,7 @@
 import { internalApi, ApiResponse } from './index';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { Transaction } from '../utils/type';
 
 const ETHERSCAN_API_KEY = '82S5SBUBPCKY3PTUX3DP6HDAHTNP1UEJVZ'; // This should ideally be loaded from a secure config
 
@@ -36,10 +37,34 @@ export async function fetchExternalBlockchainData<T>(
           const balance = response.data[0].split(' ')[0];
 
           return balance as T;
-        }
-        // EASE history is already handled by internalApi directly in wallet/index.ts
-        throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: `Unsupported action for EASE: ${action}` });
+        } else if (action === 'history') {
+          url = 'https://testnet.ease.tech/v2/history/get_actions';
+          response = await internalApi(url, method, body, undefined, false, true);
 
+          if (!response.success || !Array.isArray(response.data.actions)) {
+            logger.warn(`EASE history API returned invalid data structure for address: ${address}.`, {
+              data: response.data,
+            });
+            return [] as T;
+          }
+
+          return response.data.actions
+            .filter(
+              (a: any) =>
+                a.act?.account === 'eosio.token' && a.act?.name === 'transfer' && a.act?.data?.symbol === 'EASE',
+            )
+            .map((action: any) => {
+              const { to, quantity } = action.act.data;
+              const type = to === address ? 'in' : 'out';
+              return {
+                id: action.trx_id,
+                type,
+                amount: quantity.split(' ')[0],
+                explorerURL: '',
+              } satisfies Transaction;
+            });
+        }
+        break;
       case 'BTC':
         if (action === 'balance') {
           url = `https://mempool.space/testnet/api/address/${address}`;

@@ -193,36 +193,16 @@ describe('wallet', () => {
 
   describe('getWalletHistory', () => {
     it('should get EASE wallet history', async () => {
-      mockInternalApi.mockResolvedValueOnce({
-        success: true,
-        data: {
-          actions: [
-            {
-              act: { account: 'eosio.token', name: 'transfer', data: { to: 'testAddress', quantity: '5.0000 EASE' } },
-              trx_id: 'trx1',
-            },
-            {
-              act: { account: 'eosio.token', name: 'transfer', data: { to: 'otherAddress', quantity: '2.0000 EASE' } },
-              trx_id: 'trx2',
-            },
-          ],
-        },
-      });
+      mockFetchExternalBlockchainData.mockResolvedValueOnce([
+        { id: 'ease_trx1', type: 'in', amount: '5.0000', explorerURL: '' },
+        { id: 'ease_trx2', type: 'out', amount: '2.0000', explorerURL: '' },
+      ]);
       const history = await getWalletHistory('EASE', 'testAddress');
       expect(history).toEqual([
-        { id: 'trx1', type: 'in', amount: '5.0000', explorerURL: '' },
-        { id: 'trx2', type: 'out', amount: '2.0000', explorerURL: '' },
+        { id: 'ease_trx1', type: 'in', amount: '5.0000', explorerURL: '' },
+        { id: 'ease_trx2', type: 'out', amount: '2.0000', explorerURL: '' },
       ]);
-      expect(mockInternalApi).toHaveBeenCalledWith(
-        '/v2/history/get_actions',
-        'GET',
-        {
-          account: 'testAddress',
-          limit: 20,
-        },
-        undefined,
-        true,
-      );
+      expect(mockFetchExternalBlockchainData).toHaveBeenCalledWith('EASE', 'testAddress', 'history');
     });
 
     it('should get BTC wallet history', async () => {

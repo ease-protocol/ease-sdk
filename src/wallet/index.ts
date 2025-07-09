@@ -123,57 +123,19 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
 
     switch (coin.toUpperCase()) {
       case 'EASE': {
-        const res = await internalApi(
-          `/v2/history/get_actions`,
-          'GET',
-          { account: address, limit: 20 },
-          undefined,
-          true,
-        );
-        if (!res.success || !res.data) {
-          logger.error(
-            `EASE history request failed for address: ${address}. Error: ${res.error || 'Unknown error'}`,
-            res.errorDetails,
-          );
-          throw (
-            res.errorDetails ||
-            new EaseSDKError({ code: ErrorCode.API_ERROR, message: `EASE history request failed: ${res.error}` })
-          );
-        }
-        data = res.data;
-
-        if (!data || !Array.isArray(data.actions)) {
-          logger.warn(`EASE history API returned invalid data structure or empty actions for address: ${address}.`, {
-            data,
-          });
-          return [];
-        }
-        logger.info(
-          `Successfully retrieved EASE history for address: ${address}. Found ${data.actions.length} actions.`,
-        );
-
-        return data.actions
-          .filter((a: any) => a.act?.account === 'eosio.token' && a.act?.name === 'transfer')
-          .map((action: any) => {
-            const { to, quantity } = action.act.data;
-            const type = to === address ? 'in' : 'out';
-            return {
-              id: action.trx_id,
-              type,
-              amount: quantity.split(' ')[0],
-              explorerURL: '',
-            };
-          });
+        const txs = await fetchExternalBlockchainData<Transaction[]>(coin, address, 'history');
+        logger.info(`Successfully retrieved EASE history for address: ${address}. Found ${txs.length} transactions.`);
+        return txs;
       }
 
       case 'BTC': {
-        const txs = await fetchExternalBlockchainData<Transaction[]>('BTC', address, 'history');
+        const txs = await fetchExternalBlockchainData<Transaction[]>(coin, address, 'history');
         logger.info(`Successfully retrieved BTC history for address: ${address}. Found ${txs.length} transactions.`);
         return txs;
       }
 
       case 'ETH': {
-        const txs = await fetchExternalBlockchainData<Transaction[]>('ETH', address, 'history');
+        const txs = await fetchExternalBlockchainData<Transaction[]>(coin, address, 'history');
         logger.info(`Successfully retrieved ETH history for address: ${address}. Found ${txs.length} transactions.`);
 
         return txs;
