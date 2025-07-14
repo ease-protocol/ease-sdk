@@ -1,9 +1,12 @@
 import { join, joinCallback } from '../src/join';
-import { api } from '../src/api';
+import { internalApi } from '../src/api';
 import { ValidationError, AuthenticationError, WebAuthnError, ErrorCode } from '../src/utils/errors';
 
-jest.mock('../src/api');
-const mockApi = api as jest.MockedFunction<typeof api>;
+jest.mock('../src/api', () => ({
+  internalApi: jest.fn(),
+}));
+
+const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
 describe('Join Module', () => {
   beforeEach(() => {
@@ -33,10 +36,11 @@ describe('Join Module', () => {
       expect(result.publicKey).toEqual(mockResponse.data.publicKey);
       expect(result.sessionId).toBe('session-123');
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/join/options',
+        '/join/options',
         'POST',
         {},
-        { 'Authorization': `Bearer ${validAccessToken}` }
+        { Authorization: `Bearer ${validAccessToken}` },
+        false,
       );
     });
 
@@ -53,7 +57,7 @@ describe('Join Module', () => {
         statusCode: 401,
       });
 
-      const error = await join(validAccessToken).catch(e => e);
+      const error = await join(validAccessToken).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.UNAUTHORIZED);
     });
@@ -115,10 +119,11 @@ describe('Join Module', () => {
       await join(`  ${validAccessToken}  `);
 
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/join/options',
+        '/join/options',
         'POST',
         {},
-        { 'Authorization': `Bearer ${validAccessToken}` }
+        { Authorization: `Bearer ${validAccessToken}` },
+        false,
       );
     });
   });
@@ -153,13 +158,14 @@ describe('Join Module', () => {
       expect(result.accessToken).toBe('new-access-token');
       expect(result.refreshToken).toBe('new-refresh-token');
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/join/callback',
+        '/join/callback',
         'POST',
         { publicKey: mockCredential },
         {
-          'Authorization': `Bearer ${validAccessToken}`,
+          Authorization: `Bearer ${validAccessToken}`,
           'X-Session-Id': validSessionId,
-        }
+        },
+        false,
       );
     });
 
@@ -194,7 +200,7 @@ describe('Join Module', () => {
         statusCode: 401,
       });
 
-      const error = await joinCallback(mockCredential, validAccessToken, validSessionId).catch(e => e);
+      const error = await joinCallback(mockCredential, validAccessToken, validSessionId).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.UNAUTHORIZED);
     });
@@ -206,7 +212,7 @@ describe('Join Module', () => {
         statusCode: 400,
       });
 
-      const error = await joinCallback(mockCredential, validAccessToken, validSessionId).catch(e => e);
+      const error = await joinCallback(mockCredential, validAccessToken, validSessionId).catch((e) => e);
       expect(error).toBeInstanceOf(WebAuthnError);
       expect(error.code).toBe(ErrorCode.PASSKEY_CREATION_FAILED);
     });
@@ -237,13 +243,14 @@ describe('Join Module', () => {
       await joinCallback(mockCredential, `  ${validAccessToken}  `, `  ${validSessionId}  `);
 
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/join/callback',
+        '/join/callback',
         'POST',
         { publicKey: mockCredential },
         {
-          'Authorization': `Bearer ${validAccessToken}`,
+          Authorization: `Bearer ${validAccessToken}`,
           'X-Session-Id': validSessionId,
-        }
+        },
+        false,
       );
     });
   });

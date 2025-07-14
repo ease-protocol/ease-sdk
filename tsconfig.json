@@ -10,7 +10,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node", // Or "bundler", "nodenext" for modern resolution
+    "moduleResolution": "bundler", // Or "bundler", "nodenext" for modern resolution
     "declaration": true, // Important for tsup to pick up if it relies on tsc for .d.ts generation strategy
     "emitDeclarationOnly": true, // If tsup handles JS/MJS, tsc might only need to emit .d.ts
     "isolatedModules": true // Good practice with transpilers like tsup/esbuild/babel
