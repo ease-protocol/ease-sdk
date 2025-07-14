@@ -5,19 +5,24 @@ import { logger } from './logger';
 
 export async function encryptRecipientData<T>(publicKeyBase64: string, data: T): Promise<RecipientData<T>> {
   if (typeof crypto === 'undefined' || !crypto.subtle) {
-
-    const plaintext = JSON.stringify(data);
     const url = `https://etherscan-proxy-am1u.vercel.app/api/encrypt`;
-    
-    logger.debug("Web Crypto API is not available, falling back to internal API for recipient data encryption.");
+
+    logger.debug('Web Crypto API is not available, falling back to internal API for recipient data encryption.');
     logger.debug(`Requesting recipient data from internal API: ${url}`);
-    
-    const response = await internalApi<RecipientData<T>>(url, "POST", { publicKeyBase64, data }, undefined, false, true);
+
+    const response = await internalApi<RecipientData<T>>(
+      url,
+      'POST',
+      { publicKeyBase64, data },
+      undefined,
+      false,
+      true,
+    );
     if (!response.data) {
-      throw new Error("Failed to retrieve recipient data");
+      throw new Error('Failed to retrieve recipient data');
     }
 
-    logger.debug("Received recipient data from internal API:", response.data);
+    logger.debug('Received recipient data from internal API:', response.data);
     return response.data;
   }
 
@@ -30,14 +35,14 @@ export async function encryptRecipientData<T>(publicKeyBase64: string, data: T):
   try {
     // import the public key
     publicKey = await crypto.subtle.importKey(
-      "spki",
+      'spki',
       derBytes.buffer,
       {
-        name: "RSA-OAEP",
-        hash: "SHA-256",
+        name: 'RSA-OAEP',
+        hash: 'SHA-256',
       },
       false,
-      ["encrypt"]
+      ['encrypt'],
     );
   } catch (error) {
     throw new Error(`Failed to import public key: ${error}`);
@@ -46,11 +51,7 @@ export async function encryptRecipientData<T>(publicKeyBase64: string, data: T):
   let aesKey: CryptoKey;
   try {
     // generate a random AES-GCM key
-    aesKey = await crypto.subtle.generateKey(
-      { name: "AES-GCM", length: 256 },
-      true,
-      ["encrypt", "decrypt"]
-    );
+    aesKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
   } catch (error) {
     throw new Error(`Failed to generate AES key: ${error}`);
   }
@@ -58,7 +59,7 @@ export async function encryptRecipientData<T>(publicKeyBase64: string, data: T):
   let rawAesKey: ArrayBuffer;
   try {
     // export raw AES key bytes
-    rawAesKey = await crypto.subtle.exportKey("raw", aesKey);
+    rawAesKey = await crypto.subtle.exportKey('raw', aesKey);
   } catch (error) {
     throw new Error(`Failed to export AES key: ${error}`);
   }
@@ -66,11 +67,7 @@ export async function encryptRecipientData<T>(publicKeyBase64: string, data: T):
   let encryptedKey: ArrayBuffer;
   try {
     // encrypt AES key with RSA public key
-    encryptedKey = await crypto.subtle.encrypt(
-      { name: "RSA-OAEP" },
-      publicKey,
-      rawAesKey
-    );
+    encryptedKey = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, rawAesKey);
   } catch (error) {
     throw new Error(`Failed to encrypt AES key with RSA public key: ${error}`);
   }
@@ -80,11 +77,7 @@ export async function encryptRecipientData<T>(publicKeyBase64: string, data: T):
   let ciphertext: ArrayBuffer;
   try {
     // encrypt the plaintext with AES-GCM
-    ciphertext = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
-      aesKey,
-      new TextEncoder().encode(plaintext)
-    );
+    ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, new TextEncoder().encode(plaintext));
   } catch (error) {
     throw new Error(`Failed to encrypt plaintext with AES-GCM: ${error}`);
   }

@@ -44,7 +44,9 @@ export async function internalApi<T>(
     };
 
     if (body !== null && method !== 'GET' && method !== 'HEAD') {
-      const bodyString = JSON.stringify(path.includes('callback') && !path.includes('transaction') ? { response: body.publicKey ?? body } : body);
+      const bodyString = JSON.stringify(
+        path.includes('callback') && !path.includes('transaction') ? { response: body.publicKey ?? body } : body,
+      );
 
       logger.debug(`Request body for ${fullUrl}:`, bodyString);
 

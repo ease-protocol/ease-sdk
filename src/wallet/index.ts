@@ -1,7 +1,6 @@
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { Transaction } from '../utils/type'; // Assuming Transaction type is already defined in type.ts
-import { internalApi } from '../api';
 import { fetchExternalBlockchainData } from '../api/externalApi';
 
 export function truncateAddress(address: string): string {
@@ -119,7 +118,6 @@ export async function getWalletHistory(coin: string, address: string): Promise<T
 
   try {
     logger.debug(`Attempting to get wallet history for coin: ${coin}, address: ${address}`);
-    let data: any;
 
     switch (coin.toUpperCase()) {
       case 'EASE': {
