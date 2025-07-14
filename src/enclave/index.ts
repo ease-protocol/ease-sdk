@@ -2,7 +2,6 @@ import { internalApi as api } from '../api';
 import { AttestationDocument, GetAttestationResponse } from '../utils/type';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
-
 import { parseAttestationDocument } from '../utils/crypto';
 
 export async function getAttestation(): Promise<AttestationDocument> {

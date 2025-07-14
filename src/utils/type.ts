@@ -162,8 +162,8 @@ export type CreateTransactionResponse = {
   params: any;
 };
 
-export type RecipientData<T> = {
-  data: T;
+export type RecipientData<T = unknown> = {
+  data: string;
   encryptedKey: string;
 };
 

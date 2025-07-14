@@ -104,7 +104,8 @@ export async function fetchExternalBlockchainData<T>(
 
       case 'ETH':
         if (action === 'balance') {
-          url = `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`;
+          
+          url = `https://etherscan-proxy-am1u.vercel.app/api/balance?address=${address}`;
           response = await internalApi(url, method, body, undefined, false, true);
           logger.debug(`ETH balance API response for address ${coin}:`, JSON.stringify(response));
           if (!response.success || typeof response.data?.result === 'undefined') {
@@ -115,7 +116,7 @@ export async function fetchExternalBlockchainData<T>(
           }
           return (Number(response.data.result) / 1e18).toFixed(8) as T;
         } else if (action === 'history') {
-          url = `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&sort=desc&apikey=${ETHERSCAN_API_KEY}`;
+          url = `https://etherscan-proxy-am1u.vercel.app/api/history?address=${address}`;
           response = await internalApi(url, method, body, undefined, false, true);
           if (!response.success || !Array.isArray(response.data?.result)) {
             logger.warn(`Etherscan API returned non-array result for transaction history for address: ${address}.`, {

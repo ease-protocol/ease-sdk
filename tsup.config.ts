@@ -11,6 +11,7 @@ export default defineConfig({
     'src/transaction/index.ts',
     'src/wallet/index.ts',
     'src/utils/type.ts',
+    'src/utils/crypto.ts',
     'src/refresh/index.ts',
   ], // ← point to your file(s)
   format: ['esm', 'cjs'],
