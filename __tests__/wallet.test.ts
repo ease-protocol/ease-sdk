@@ -8,7 +8,6 @@ import {
 } from '../src/wallet';
 import { EaseSDKError, ErrorCode } from '../src/utils/errors';
 import { logger } from '../src/utils/logger';
-import { internalApi } from '../src/api/index';
 import { fetchExternalBlockchainData } from '../src/api/externalApi';
 
 jest.mock('../src/api/index', () => ({
@@ -33,7 +32,6 @@ jest.mock('../src/utils/logger', () => ({
   },
 }));
 
-const mockInternalApi = internalApi as jest.MockedFunction<typeof internalApi>;
 const mockFetchExternalBlockchainData = fetchExternalBlockchainData as jest.MockedFunction<
   typeof fetchExternalBlockchainData
 >;

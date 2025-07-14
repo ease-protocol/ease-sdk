@@ -6,6 +6,7 @@ export * from './wallet';
 export * from './enclave';
 export * from './transaction';
 export * from './refresh';
+export * from './google';
 
 // Re-export logger, errors, and types for convenience
 export { logger, LogLevel } from './utils/logger';
@@ -61,8 +62,7 @@ export type {
   SignTransactionOptionsResponse,
   SignTransactionCallbackInput,
   SignTransactionCallbackResponse,
+  GoogleOAuthCallbackRequest,
+  GoogleOAuthURLResponse,
+  GoogleOAuthCallbackResponse,
 } from './utils/type';
-
-export interface EaseSDKConfig {
-  // No telemetry configuration
-}

@@ -3,8 +3,6 @@ import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { Transaction } from '../utils/type';
 
-const ETHERSCAN_API_KEY = '82S5SBUBPCKY3PTUX3DP6HDAHTNP1UEJVZ'; // This should ideally be loaded from a secure config
-
 export async function fetchExternalBlockchainData<T>(
   coin: string,
   address: string,
@@ -104,7 +102,6 @@ export async function fetchExternalBlockchainData<T>(
 
       case 'ETH':
         if (action === 'balance') {
-          
           url = `https://etherscan-proxy-am1u.vercel.app/api/balance?address=${address}`;
           response = await internalApi(url, method, body, undefined, false, true);
           logger.debug(`ETH balance API response for address ${coin}:`, JSON.stringify(response));
