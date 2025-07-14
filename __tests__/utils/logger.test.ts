@@ -16,7 +16,7 @@ describe('Logger Utils', () => {
   });
 
   afterEach(() => {
-    Object.values(consoleSpy).forEach(spy => spy.mockRestore());
+    Object.values(consoleSpy).forEach((spy) => spy.mockRestore());
   });
 
   describe('LogLevel filtering', () => {
@@ -85,12 +85,7 @@ describe('Logger Utils', () => {
       const obj = { test: 'data' };
       logger.error('error message', obj, 'additional arg');
 
-      expect(consoleSpy.error).toHaveBeenCalledWith(
-        '[ease-sdk] [ERROR]',
-        'error message',
-        obj,
-        'additional arg'
-      );
+      expect(consoleSpy.error).toHaveBeenCalledWith('[ease-sdk] [ERROR]', 'error message', obj, 'additional arg');
     });
   });
 

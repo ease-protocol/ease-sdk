@@ -4,31 +4,32 @@ export enum ErrorCode {
   API_ERROR = 'API_ERROR',
   TIMEOUT_ERROR = 'TIMEOUT_ERROR',
   RATE_LIMIT_ERROR = 'RATE_LIMIT_ERROR',
-  
+
   // Authentication errors
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
   AUTHENTICATION_FAILED = 'AUTHENTICATION_FAILED',
   SESSION_EXPIRED = 'SESSION_EXPIRED',
   UNAUTHORIZED = 'UNAUTHORIZED',
-  
+  TOKEN_REFRESH_FAILED = 'TOKEN_REFRESH_FAILED',
+
   // Phone/OTP errors
   INVALID_PHONE_NUMBER = 'INVALID_PHONE_NUMBER',
   INVALID_OTP = 'INVALID_OTP',
   OTP_EXPIRED = 'OTP_EXPIRED',
   OTP_SEND_FAILED = 'OTP_SEND_FAILED',
   OTP_VERIFY_FAILED = 'OTP_VERIFY_FAILED',
-  
+
   // WebAuthn/Passkey errors
   WEBAUTHN_NOT_SUPPORTED = 'WEBAUTHN_NOT_SUPPORTED',
   PASSKEY_CREATION_FAILED = 'PASSKEY_CREATION_FAILED',
   PASSKEY_AUTHENTICATION_FAILED = 'PASSKEY_AUTHENTICATION_FAILED',
   USER_CANCELLED = 'USER_CANCELLED',
-  
+
   // Validation errors
   INVALID_INPUT = 'INVALID_INPUT',
   MISSING_REQUIRED_FIELD = 'MISSING_REQUIRED_FIELD',
   INVALID_FORMAT = 'INVALID_FORMAT',
-  
+
   // General errors
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
@@ -92,12 +93,7 @@ export class NetworkError extends EaseSDKError {
 }
 
 export class APIError extends EaseSDKError {
-  constructor(
-    message: string,
-    statusCode?: number,
-    cause?: Error,
-    context?: Record<string, any>
-  ) {
+  constructor(message: string, statusCode?: number, cause?: Error, context?: Record<string, any>) {
     super({
       code: ErrorCode.API_ERROR,
       message,
@@ -186,11 +182,11 @@ export function mapHTTPStatusToErrorCode(status: number): ErrorCode {
 export function createErrorFromAPIResponse(
   statusCode: number,
   responseData: any,
-  context?: Record<string, any>
+  context?: Record<string, any>,
 ): EaseSDKError {
   const errorCode = mapHTTPStatusToErrorCode(statusCode);
   const message = responseData?.error || responseData?.message || `HTTP ${statusCode} error`;
-  
+
   return new EaseSDKError({
     code: errorCode,
     message,
@@ -209,6 +205,10 @@ export function isEaseSDKError(error: any): error is EaseSDKError {
 export function handleUnknownError(error: unknown, context?: Record<string, any>): EaseSDKError {
   if (isEaseSDKError(error)) {
     return error;
+  }
+
+  if (error instanceof TypeError) {
+    return new NetworkError(error.message, error, context);
   }
 
   if (error instanceof Error) {

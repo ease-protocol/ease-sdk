@@ -1,7 +1,7 @@
-export default {
+module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  collectCoverage: true,
+  collectCoverage: false,
   coverageDirectory: 'coverage',
   coverageReporters: ['lcov', 'text'],
   collectCoverageFrom: [
@@ -12,5 +12,14 @@ export default {
     '!src/**/*.spec.ts',
   ],
   modulePathIgnorePatterns: ['<rootDir>/src/.*\\.js$'], // Ignore JS files in src
+  transform: {
+    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.js$': 'babel-jest',
+  },
+  transformIgnorePatterns: ['/node_modules/(?!(cbor2|@sentry/react-native|react-native|node-fetch)/)'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  moduleNameMapper: {
+    '^react-native$': '<rootDir>/__mocks__/react-native.js',
+  },
 };

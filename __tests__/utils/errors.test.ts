@@ -182,7 +182,7 @@ describe('Error Utils', () => {
     it('should return true for specific error class instances', () => {
       const networkError = new NetworkError('Network failed');
       const authError = new AuthenticationError('Auth failed');
-      
+
       expect(isEaseSDKError(networkError)).toBe(true);
       expect(isEaseSDKError(authError)).toBe(true);
     });

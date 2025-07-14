@@ -1,9 +1,12 @@
 import { login, loginCallback } from '../src/login';
-import { api } from '../src/api';
+import { internalApi } from '../src/api';
 import { AuthenticationError, WebAuthnError, ValidationError, ErrorCode } from '../src/utils/errors';
 
-jest.mock('../src/api');
-const mockApi = api as jest.MockedFunction<typeof api>;
+jest.mock('../src/api', () => ({
+  internalApi: jest.fn(),
+}));
+
+const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
 describe('Login Module', () => {
   beforeEach(() => {
@@ -29,10 +32,7 @@ describe('Login Module', () => {
 
       expect(result.sessionId).toBe('session-123');
       expect(result.publicKey).toEqual(mockResponse.data.publicKey);
-      expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/login/options',
-        'POST'
-      );
+      expect(mockApi).toHaveBeenCalledWith('/login/options', 'POST', null, undefined, false);
     });
 
     it('should handle API error responses', async () => {
@@ -42,7 +42,7 @@ describe('Login Module', () => {
         statusCode: 503,
       });
 
-      const error = await login().catch(e => e);
+      const error = await login().catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.AUTHENTICATION_FAILED);
     });
@@ -68,7 +68,7 @@ describe('Login Module', () => {
         headers: new Headers(),
       });
 
-      const error = await login().catch(e => e);
+      const error = await login().catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.SESSION_EXPIRED);
     });
@@ -80,7 +80,7 @@ describe('Login Module', () => {
         headers: new Headers({ 'X-Session-Id': 'session-123' }),
       });
 
-      const error = await login().catch(e => e);
+      const error = await login().catch((e) => e);
       expect(error).toBeInstanceOf(WebAuthnError);
       expect(error.code).toBe(ErrorCode.WEBAUTHN_NOT_SUPPORTED);
     });
@@ -122,10 +122,13 @@ describe('Login Module', () => {
       expect(result.accessToken).toBe('access-token');
       expect(result.refreshToken).toBe('refresh-token');
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/login/callback',
+        '/login/callback',
         'POST',
         mockCredential,
-        { 'X-Session-Id': validSessionId }
+        {
+          'X-Session-Id': validSessionId,
+        },
+        false,
       );
     });
 
@@ -160,7 +163,7 @@ describe('Login Module', () => {
         statusCode: 401,
       });
 
-      const error = await loginCallback(mockCredential, validSessionId).catch(e => e);
+      const error = await loginCallback(mockCredential, validSessionId).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.INVALID_CREDENTIALS);
     });
@@ -172,7 +175,7 @@ describe('Login Module', () => {
         statusCode: 400,
       });
 
-      const error = await loginCallback(mockCredential, validSessionId).catch(e => e);
+      const error = await loginCallback(mockCredential, validSessionId).catch((e) => e);
       expect(error).toBeInstanceOf(WebAuthnError);
       expect(error.code).toBe(ErrorCode.PASSKEY_AUTHENTICATION_FAILED);
     });
@@ -196,7 +199,7 @@ describe('Login Module', () => {
         statusCode: 500,
       });
 
-      const error = await loginCallback(mockCredential, validSessionId).catch(e => e);
+      const error = await loginCallback(mockCredential, validSessionId).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.AUTHENTICATION_FAILED);
     });

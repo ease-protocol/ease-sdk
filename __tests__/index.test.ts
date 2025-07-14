@@ -3,7 +3,7 @@ import * as EaseSDK from '../src/index';
 describe('Main Index Exports', () => {
   it('should export all modules', () => {
     expect(EaseSDK.join).toBeDefined();
-    expect(EaseSDK.phone).toBeDefined();
+    expect(EaseSDK.sendOtp).toBeDefined();
     expect(EaseSDK.login).toBeDefined();
     expect(EaseSDK.logout).toBeDefined();
   });
@@ -40,22 +40,22 @@ describe('Main Index Exports', () => {
 
   describe('Module structure', () => {
     it('should have join module with expected functions', () => {
-      expect(typeof EaseSDK.join.join).toBe('function');
-      expect(typeof EaseSDK.join.joinCallback).toBe('function');
+      expect(typeof EaseSDK.join).toBe('function');
+      expect(typeof EaseSDK.joinCallback).toBe('function');
     });
 
     it('should have phone module with expected functions', () => {
-      expect(typeof EaseSDK.phone.sendOtp).toBe('function');
-      expect(typeof EaseSDK.phone.verifyOtp).toBe('function');
+      expect(typeof EaseSDK.sendOtp).toBe('function');
+      expect(typeof EaseSDK.verifyOtp).toBe('function');
     });
 
     it('should have login module with expected functions', () => {
-      expect(typeof EaseSDK.login.login).toBe('function');
-      expect(typeof EaseSDK.login.loginCallback).toBe('function');
+      expect(typeof EaseSDK.login).toBe('function');
+      expect(typeof EaseSDK.loginCallback).toBe('function');
     });
 
     it('should have logout module with expected functions', () => {
-      expect(typeof EaseSDK.logout.logout).toBe('function');
+      expect(typeof EaseSDK.logout).toBe('function');
     });
   });
 
@@ -65,7 +65,7 @@ describe('Main Index Exports', () => {
         code: EaseSDK.ErrorCode.API_ERROR,
         message: 'Test error',
       });
-      
+
       expect(error).toBeInstanceOf(EaseSDK.EaseSDKError);
       expect(error.code).toBe(EaseSDK.ErrorCode.API_ERROR);
       expect(error.message).toBe('Test error');

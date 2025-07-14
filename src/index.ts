@@ -1,15 +1,17 @@
-import * as join from "./join";
-import * as phone from "./phone";
-import * as login from "./login";
-import * as logout from "./logout";
-
-export { join, phone, login, logout };
+export * from './join';
+export * from './phone';
+export * from './login';
+export * from './logout';
+export * from './wallet';
+export * from './enclave';
+export * from './transaction';
+export * from './refresh';
 
 // Re-export logger, errors, and types for convenience
-export { logger, LogLevel } from "./utils/logger";
-export type { LoggerConfig } from "./utils/logger";
+export { logger, LogLevel } from './utils/logger';
+export type { LoggerConfig } from './utils/logger';
 
-export { 
+export {
   EaseSDKError,
   NetworkError,
   APIError,
@@ -19,9 +21,9 @@ export {
   WebAuthnError,
   ErrorCode,
   isEaseSDKError,
-  handleUnknownError
-} from "./utils/errors";
-export type { ErrorDetails } from "./utils/errors";
+  handleUnknownError,
+} from './utils/errors';
+export type { ErrorDetails } from './utils/errors';
 
 export type {
   APIDefaultResponse,
@@ -46,8 +48,21 @@ export type {
   PublicKeyCredential,
   OptionsResp,
   LoginResp,
-  JoinResponse
-} from "./utils/type";
+  JoinResponse,
+  AttestationDocument,
+  Transaction,
+  GetAttestationResponse,
+  Address,
+  CreateKeysInput,
+  CreateKeysResponse,
+  RecipientData,
+  CreateTransactionResponse,
+  TransactionIntent,
+  SignTransactionOptionsResponse,
+  SignTransactionCallbackInput,
+  SignTransactionCallbackResponse,
+} from './utils/type';
 
-
-
+export interface EaseSDKConfig {
+  // No telemetry configuration
+}

@@ -1,9 +1,12 @@
 import { logout } from '../src/logout';
-import { api } from '../src/api';
+import { internalApi } from '../src/api';
 import { ValidationError, AuthenticationError, ErrorCode } from '../src/utils/errors';
 
-jest.mock('../src/api');
-const mockApi = api as jest.MockedFunction<typeof api>;
+jest.mock('../src/api', () => ({
+  internalApi: jest.fn(),
+}));
+
+const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
 describe('Logout Module', () => {
   beforeEach(() => {
@@ -22,10 +25,11 @@ describe('Logout Module', () => {
       await expect(logout(validAccessToken)).resolves.toBeUndefined();
 
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/logout',
+        '/logout',
         'POST',
         {},
-        { 'Authorization': `Bearer ${validAccessToken}` }
+        { Authorization: `Bearer ${validAccessToken}` },
+        false,
       );
     });
 
@@ -42,7 +46,7 @@ describe('Logout Module', () => {
         statusCode: 401,
       });
 
-      const error = await logout(validAccessToken).catch(e => e);
+      const error = await logout(validAccessToken).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.UNAUTHORIZED);
     });
@@ -54,7 +58,7 @@ describe('Logout Module', () => {
         statusCode: 500,
       });
 
-      const error = await logout(validAccessToken).catch(e => e);
+      const error = await logout(validAccessToken).catch((e) => e);
       expect(error).toBeInstanceOf(AuthenticationError);
       expect(error.code).toBe(ErrorCode.AUTHENTICATION_FAILED);
     });
@@ -74,10 +78,11 @@ describe('Logout Module', () => {
       await logout(`  ${validAccessToken}  `);
 
       expect(mockApi).toHaveBeenCalledWith(
-        'https://api.ease.tech/logout',
+        '/logout',
         'POST',
         {},
-        { 'Authorization': `Bearer ${validAccessToken}` }
+        { Authorization: `Bearer ${validAccessToken}` },
+        false,
       );
     });
 

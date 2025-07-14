@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.0.1",
+  "version": "1.0.38",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -17,7 +17,9 @@
     "format": "prettier --write .",
     "build": "tsup",
     "build:watch": "tsup --watch",
-    "test": "jest"
+    "test": "jest",
+    "docs": "typedoc --plugin typedoc-plugin-markdown --out docs src",
+    "compile": "tsc"
   },
   "exports": {
     ".": {
@@ -45,25 +47,56 @@
       "import": "./dist/logout/index.mjs",
       "require": "./dist/logout/index.js"
     },
+    "./transaction": {
+      "types": "./dist/transaction/index.d.ts",
+      "import": "./dist/transaction/index.mjs",
+      "require": "./dist/transaction/index.js"
+    },
+    "./wallet": {
+      "types": "./dist/wallet/index.d.ts",
+      "import": "./dist/wallet/index.mjs",
+      "require": "./dist/wallet/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/crypto.d.ts",
+      "import": "./dist/utils/crypto.mjs",
+      "require": "./dist/utils/crypto.js"
+    },
+    "./enclave": {
+      "types": "./dist/enclave/index.d.ts",
+      "import": "./dist/enclave/index.mjs",
+      "require": "./dist/enclave/index.js"
+    },
+    "./refresh": {
+      "types": "./dist/refresh/index.d.ts",
+      "import": "./dist/refresh/index.mjs",
+      "require": "./dist/refresh/index.js"
+    },
     "./package.json": "./package.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/preset-env": "^7.28.0",
     "@eslint/js": "^9.22.0",
+    "@react-native/babel-preset": "^0.80.1",
     "@types/axios": "^0.14.4",
     "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.26.1",
+    "babel-jest": "^30.0.4",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
     "globals": "^16.0.0",
     "jest": "^29.7.0",
+    "jest-fetch-mock": "^3.0.3",
     "prettier": "^3.5.3",
     "ts-jest": "^29.2.6",
     "tsup": "^8.4.0",
+    "typedoc": "^0.28.7",
+    "typedoc-plugin-markdown": "^4.7.0",
     "typescript-eslint": "^8.26.1"
   },
   "prettier": {
@@ -79,6 +112,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.27.1",
-    "axios": "^1.8.3"
+    "axios": "^1.8.3",
+    "cbor2": "^2.0.1",
+    "tslib": "^2.x.x"
   }
 }
