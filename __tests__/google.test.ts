@@ -27,7 +27,7 @@ describe('Google OAuth', () => {
       const result = await getGoogleOAuthURL();
 
       expect(result).toEqual(mockResponse.data);
-      expect(internalApi).toHaveBeenCalledWith('/oauth/google', 'GET', null, undefined, false);
+      expect(internalApi).toHaveBeenCalledWith('/oauth/google', 'GET');
     });
 
     it('should throw an AuthenticationError on failure', async () => {

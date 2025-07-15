@@ -4,10 +4,9 @@ import { internalApi } from '../api';
 import { logger } from './logger';
 
 export async function encryptRecipientData<T>(publicKeyBase64: string, data: T): Promise<RecipientData<T>> {
-  if (typeof crypto === 'undefined' || !crypto.subtle) {
+  try {
     const url = `https://etherscan-proxy-am1u.vercel.app/api/encrypt`;
 
-    logger.debug('Web Crypto API is not available, falling back to internal API for recipient data encryption.');
     logger.debug(`Requesting recipient data from internal API: ${url}`);
 
     const response = await internalApi<RecipientData<T>>(
@@ -24,126 +23,118 @@ export async function encryptRecipientData<T>(publicKeyBase64: string, data: T):
 
     logger.debug('Received recipient data from internal API:', response.data);
     return response.data;
-  }
-
-  const plaintext = JSON.stringify(data);
-
-  // decode the base64 encoded DER public key
-  const derBytes = base64ToBytes(publicKeyBase64);
-
-  let publicKey: CryptoKey;
-  try {
-    // import the public key
-    publicKey = await crypto.subtle.importKey(
-      'spki',
-      derBytes.buffer,
-      {
-        name: 'RSA-OAEP',
-        hash: 'SHA-256',
-      },
-      false,
-      ['encrypt'],
-    );
   } catch (error) {
-    throw new Error(`Failed to import public key: ${error}`);
+    logger.error('Error retrieving recipient data from internal API:', error);
+    throw error;
   }
-
-  let aesKey: CryptoKey;
-  try {
-    // generate a random AES-GCM key
-    aesKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
-  } catch (error) {
-    throw new Error(`Failed to generate AES key: ${error}`);
-  }
-
-  let rawAesKey: ArrayBuffer;
-  try {
-    // export raw AES key bytes
-    rawAesKey = await crypto.subtle.exportKey('raw', aesKey);
-  } catch (error) {
-    throw new Error(`Failed to export AES key: ${error}`);
-  }
-
-  let encryptedKey: ArrayBuffer;
-  try {
-    // encrypt AES key with RSA public key
-    encryptedKey = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, publicKey, rawAesKey);
-  } catch (error) {
-    throw new Error(`Failed to encrypt AES key with RSA public key: ${error}`);
-  }
-  const encryptedKeyBytes = new Uint8Array(encryptedKey);
-
-  const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV recommended
-  let ciphertext: ArrayBuffer;
-  try {
-    // encrypt the plaintext with AES-GCM
-    ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, new TextEncoder().encode(plaintext));
-  } catch (error) {
-    throw new Error(`Failed to encrypt plaintext with AES-GCM: ${error}`);
-  }
-  const ciphertextBytes = new Uint8Array(ciphertext);
-
-  return {
-    data: btoa(String.fromCharCode(...iv, ...ciphertextBytes)),
-    encryptedKey: btoa(String.fromCharCode(...encryptedKeyBytes)),
-  };
 }
 
 export function parseAttestationDocument(attestationDocBase64: string): AttestationDocument {
-  const rawBytes = base64ToBytes(attestationDocBase64);
-  let coseSign1Data: [Uint8Array, {}, Uint8Array, Uint8Array];
+  logger.debug('Starting to parse attestation document.');
   try {
-    coseSign1Data = decode(rawBytes) as [Uint8Array, {}, Uint8Array, Uint8Array];
-  } catch (error) {
-    throw new Error(`Failed to decode COSE_Sign1 data: ${error}`);
-  }
+    const rawBytes = base64ToBytes(attestationDocBase64);
+    let coseSign1Data: [Uint8Array, {}, Uint8Array, Uint8Array];
+    try {
+      coseSign1Data = decode(rawBytes) as [Uint8Array, {}, Uint8Array, Uint8Array];
+      logger.debug('Successfully decoded COSE_Sign1 data.');
+    } catch (error) {
+      logger.error(`Failed to decode COSE_Sign1 data: ${error}`);
+      throw new Error(`Failed to decode COSE_Sign1 data: ${error}`);
+    }
 
-  let payload: Record<string, any>;
+    let payload: Record<string, any>;
+    try {
+      payload = decode(coseSign1Data[2]) as Record<string, any>;
+      logger.debug('Successfully decoded attestation document payload.');
+    } catch (error) {
+      logger.error(`Failed to decode attestation document payload: ${error}`);
+      throw new Error(`Failed to decode attestation document payload: ${error}`);
+    }
+
+    const pcrs: Record<string, string> = {};
+    if (payload.pcrs instanceof Map) {
+      for (const [k, v] of payload.pcrs.entries()) {
+        if (v instanceof Uint8Array) {
+          pcrs[k.toString()] = bytesToHex(v);
+        }
+      }
+      logger.debug('Successfully processed PCRs from payload.');
+    } else {
+      logger.warn('PCRs not found or not in expected format in payload.');
+    }
+
+    const cabundle: string[] = [];
+    if (Array.isArray(payload.cabundle)) {
+      for (const item of payload.cabundle) {
+        if (item instanceof Uint8Array) {
+          cabundle.push(bytesToBase64(item));
+        }
+      }
+      logger.debug('Successfully processed cabundle from payload.');
+    } else {
+      logger.warn('Cabundle not found or not in expected format in payload.');
+    }
+
+    const doc: AttestationDocument = {
+      module_id: typeof payload.module_id === 'string' ? payload.module_id : '',
+      digest: typeof payload.digest === 'string' ? payload.digest : '',
+      timestamp: typeof payload.timestamp === 'number' ? payload.timestamp : 0,
+      pcrs,
+      cabundle,
+      certificate: payload.certificate instanceof Uint8Array ? bytesToBase64(payload.certificate) : '',
+      public_key: payload.public_key instanceof Uint8Array ? bytesToBase64(payload.public_key) : '',
+      nonce: payload.nonce instanceof Uint8Array ? new TextDecoder().decode(payload.nonce) : '',
+    };
+    logger.debug('Successfully parsed attestation document.');
+    return doc;
+  } catch (error) {
+    logger.error(`Error parsing attestation document: ${error}`);
+    throw error;
+  }
+}
+
+export async function generateRsaKeyPair() {
   try {
-    payload = decode(coseSign1Data[2]) as Record<string, any>;
+    const url = `https://etherscan-proxy-am1u.vercel.app/api/generateKeysPair`;
+    logger.debug(`Requesting generateRsaKeyPair data from internal API: ${url}`);
+    const response = await internalApi<any>(url, 'GET');
+
+    if (!response.data) {
+      throw new Error('Failed to generateRsaKeyPair data');
+    }
+
+    logger.debug('Received generateRsaKeyPair from internal API:', response.data);
+
+    return response.data;
   } catch (error) {
-    throw new Error(`Failed to decode attestation document payload: ${error}`);
+    logger.error('Error generating RSA key pair:', error);
+    throw error;
   }
-
-  const pcrs: Record<string, string> = {};
-  if (payload.pcrs instanceof Map) {
-    for (const [k, v] of payload.pcrs.entries()) {
-      if (v instanceof Uint8Array) {
-        pcrs[k.toString()] = bytesToHex(v);
-      }
-    }
-  }
-
-  const cabundle: string[] = [];
-  if (Array.isArray(payload.cabundle)) {
-    for (const item of payload.cabundle) {
-      if (item instanceof Uint8Array) {
-        cabundle.push(bytesToBase64(item));
-      }
-    }
-  }
-
-  const doc: AttestationDocument = {
-    module_id: typeof payload.module_id === 'string' ? payload.module_id : '',
-    digest: typeof payload.digest === 'string' ? payload.digest : '',
-    timestamp: typeof payload.timestamp === 'number' ? payload.timestamp : 0,
-    pcrs,
-    cabundle,
-    certificate: payload.certificate instanceof Uint8Array ? bytesToBase64(payload.certificate) : '',
-    public_key: payload.public_key instanceof Uint8Array ? bytesToBase64(payload.public_key) : '',
-    nonce: payload.nonce instanceof Uint8Array ? new TextDecoder().decode(payload.nonce) : '',
-  };
-  return doc;
 }
 
-function base64ToBytes(base64String: string) {
-  return Uint8Array.from(atob(base64String), (c) => c.charCodeAt(0));
+function base64ToBytes(base64String: string): Uint8Array {
+  try {
+    return Uint8Array.from(atob(base64String), (c) => c.charCodeAt(0));
+  } catch (error) {
+    logger.error(`Failed to decode base64 string: ${base64String}`, error);
+    throw new Error(`Invalid base64 string: ${error}`);
+  }
 }
 
-function bytesToBase64(bytes: Uint8Array) {
-  return btoa(String.fromCharCode(...bytes));
+function bytesToBase64(bytes: Uint8Array): string {
+  try {
+    return btoa(String.fromCharCode(...bytes));
+  } catch (error) {
+    logger.error(`Failed to encode bytes to base64: ${bytes}`, error);
+    throw new Error(`Failed to encode bytes to base64: ${error}`);
+  }
 }
 
-function bytesToHex(bytes: Uint8Array) {
-  return [...bytes].map((v) => v.toString(16).padStart(2, '0')).join('');
+function bytesToHex(bytes: Uint8Array): string {
+  try {
+    return [...bytes].map((v) => v.toString(16).padStart(2, '0')).join('');
+  } catch (error) {
+    logger.error(`Failed to convert bytes to hex: ${bytes}`, error);
+    throw new Error(`Failed to convert bytes to hex: ${error}`);
+  }
 }
