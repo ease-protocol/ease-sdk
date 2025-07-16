@@ -7,7 +7,7 @@ export async function encryptRecipientData<T>(publicKeyBase64: string, data: T):
   try {
     const url = `https://etherscan-proxy-am1u.vercel.app/api/encrypt`;
 
-    logger.debug(`Requesting recipient data from internal API: ${url}`);
+    logger.debug(`Requesting encryption of recipient data from internal API: ${url}`);
 
     const response = await internalApi<RecipientData<T>>(
       url,
@@ -17,14 +17,24 @@ export async function encryptRecipientData<T>(publicKeyBase64: string, data: T):
       false,
       true,
     );
-    if (!response.data) {
-      throw new Error('Failed to retrieve recipient data');
+
+    if (!response.success) {
+      logger.error('Encryption of recipient data failed:', {
+        error: response.error,
+        statusCode: response.statusCode,
+      });
+      throw new Error(response.error || 'Failed to encrypt recipient data');
     }
 
-    logger.debug('Received recipient data from internal API:', response.data);
+    if (!response.data) {
+      logger.error('Encryption of recipient data failed: No data received in response.');
+      throw new Error('Failed to encrypt recipient data: No data received');
+    }
+
+    logger.debug('Successfully encrypted recipient data:', response.data);
     return response.data;
   } catch (error) {
-    logger.error('Error retrieving recipient data from internal API:', error);
+    logger.error('Error encrypting recipient data:', error);
     throw error;
   }
 }
@@ -96,18 +106,51 @@ export function parseAttestationDocument(attestationDocBase64: string): Attestat
 export async function generateRsaKeyPair() {
   try {
     const url = `https://etherscan-proxy-am1u.vercel.app/api/generateKeysPair`;
-    logger.debug(`Requesting generateRsaKeyPair data from internal API: ${url}`);
-    const response = await internalApi<any>(url, 'GET');
+    logger.debug(`Requesting RSA key pair generation from internal API: ${url}`);
+    const response = await internalApi<{ publicKey: string; privateKey: string }>(
+      url,
+      'GET',
+      null,
+      undefined,
+      false,
+      true,
+    );
 
-    if (!response.data) {
-      throw new Error('Failed to generateRsaKeyPair data');
+    if (!response.success) {
+      logger.error('Failed to generate RSA key pair:', response.error);
+      throw new Error(response.error || 'Failed to generate RSA key pair');
     }
 
-    logger.debug('Received generateRsaKeyPair from internal API:', response.data);
+    if (!response.data) {
+      logger.error('Failed to generate RSA key pair: No data received', response);
+      throw new Error('Failed to generate RSA key pair: No data received');
+    }
+
+    logger.debug('Successfully generated RSA key pair:', response.data);
 
     return response.data;
   } catch (error) {
     logger.error('Error generating RSA key pair:', error);
+    throw error;
+  }
+}
+
+export async function decryptRecipientData(privateKeyBase64: string, recipientData: RecipientData) {
+  try {
+    const url = `https://etherscan-proxy-am1u.vercel.app/api/decrypt`;
+    logger.debug(`Requesting decryption from internal API: ${url}`);
+    const response = await internalApi<any>(url, 'POST', { privateKeyBase64, recipientData }, undefined, false, true);
+
+    if (!response.data) {
+      logger.error('Failed to decrypt data: No data received', response);
+      throw new Error('Failed to decrypt data: No data received');
+    }
+
+    logger.debug('Successfully decrypted data from internal API:', response.data);
+
+    return response.data;
+  } catch (error) {
+    logger.error('Error decrypting data:', error);
     throw error;
   }
 }
