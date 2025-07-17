@@ -1,5 +1,5 @@
-import { internalApi as api } from '../api';
-import { APIDefaultResponse, JoinResponse, OptionsResp, PublicKeyCredential } from '../utils/type';
+import { internalApi } from '../api';
+import { JoinResponse, OptionsResp, PublicKeyCredential, JoinCallbackResponse, RecipientData } from '../utils/type';
 import { logger } from '../utils/logger';
 import {
   AuthenticationError,
@@ -10,22 +10,24 @@ import {
   isEaseSDKError,
 } from '../utils/errors';
 
-export async function join(accessToken: string): Promise<JoinResponse> {
-  // Input validation
+export async function join(accessToken: string, displayName: string): Promise<JoinResponse> {
   if (!accessToken || typeof accessToken !== 'string') {
     throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);
   }
-
-  // Basic token format validation
   if (accessToken.trim().length < 10) {
     throw new ValidationError('Access token appears to be invalid', 'accessToken', 'token too short');
   }
+  if (!displayName || typeof displayName !== 'string') {
+    throw new ValidationError('Display name is required and must be a string', 'displayName', displayName);
+  }
 
   try {
-    const response = await api<OptionsResp>(
+    const response = await internalApi<OptionsResp>(
       '/join/options',
       'POST',
-      {},
+      {
+        displayName,
+      },
       {
         Authorization: `Bearer ${accessToken.trim()}`,
       },
@@ -43,23 +45,22 @@ export async function join(accessToken: string): Promise<JoinResponse> {
         throw response.errorDetails;
       }
 
-      // Map common join errors
       if (response.statusCode === 401) {
-        throw new AuthenticationError('Invalid or expired access token', ErrorCode.UNAUTHORIZED, {
-          tokenPrefix: accessToken.substring(0, 8),
-        });
+        throw new AuthenticationError('Invalid or expired access token', ErrorCode.UNAUTHORIZED, 
+          { tokenPrefix: accessToken.substring(0, 8), displayName });
       }
 
       throw new WebAuthnError(
         response.error || 'Failed to get passkey creation options',
         ErrorCode.PASSKEY_CREATION_FAILED,
-        { tokenPrefix: accessToken.substring(0, 8) },
+        { tokenPrefix: accessToken.substring(0, 8), displayName },
       );
     }
 
     if (!response.data) {
       throw new WebAuthnError('Invalid response: missing join data', ErrorCode.PASSKEY_CREATION_FAILED, {
         tokenPrefix: accessToken.substring(0, 8),
+        displayName
       });
     }
 
@@ -69,7 +70,7 @@ export async function join(accessToken: string): Promise<JoinResponse> {
       throw new WebAuthnError(
         'Invalid response: missing WebAuthn creation options',
         ErrorCode.PASSKEY_CREATION_FAILED,
-        { tokenPrefix: accessToken.substring(0, 8) },
+        { tokenPrefix: accessToken.substring(0, 8), displayName },
       );
     }
 
@@ -77,6 +78,12 @@ export async function join(accessToken: string): Promise<JoinResponse> {
 
     if (!sessionId) {
       logger.warn('Missing session ID in join response headers');
+
+      throw new WebAuthnError(
+        'Invalid response: missing session ID',
+        ErrorCode.PASSKEY_CREATION_FAILED,
+        { tokenPrefix: accessToken.substring(0, 8), displayName },
+      );
     }
 
     logger.debug('Join options retrieved successfully:', {
@@ -87,7 +94,7 @@ export async function join(accessToken: string): Promise<JoinResponse> {
 
     return {
       publicKey,
-      sessionId: sessionId || '',
+      sessionId,
     };
   } catch (error) {
     if (isEaseSDKError(error)) {
@@ -96,8 +103,7 @@ export async function join(accessToken: string): Promise<JoinResponse> {
 
     const enhancedError = handleUnknownError(error, {
       operation: 'join',
-      tokenPrefix: accessToken.substring(0, 8),
-    });
+      tokenPrefix: accessToken.substring(0, 8), displayName});
 
     logger.error('Unexpected error in join:', enhancedError);
     throw enhancedError;
@@ -108,21 +114,35 @@ export async function joinCallback(
   credential: PublicKeyCredential,
   accessToken: string,
   sessionId: string,
-): Promise<APIDefaultResponse> {
-  // Input validation
+  accountName: string,
+  recipientPublicKey: string,
+  recipientData: RecipientData,
+  mnemonic?: string,
+  password?: string,
+): Promise<JoinCallbackResponse> {
   if (!credential) {
     throw new ValidationError('WebAuthn credential is required', 'credential', credential);
   }
-
   if (!accessToken || typeof accessToken !== 'string') {
     throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);
   }
-
   if (!sessionId || typeof sessionId !== 'string') {
     throw new ValidationError('Session ID is required and must be a string', 'sessionId', sessionId);
   }
+  if (!accountName || typeof accountName !== 'string') {
+    throw new ValidationError('Account name is required and must be a string', 'accountName', accountName);
+  }
+  if (!recipientPublicKey || typeof recipientPublicKey !== 'string') {
+    throw new ValidationError(
+      'Recipient public key is required and must be a string',
+      'recipientPublicKey',
+      recipientPublicKey,
+    );
+  }
+  if (!recipientData) {
+    throw new ValidationError('Recipient data is required', 'recipientData', recipientData);
+  }
 
-  // Validate credential structure
   if (!credential.id || !credential.response || credential.type !== 'public-key') {
     throw new ValidationError('Invalid WebAuthn credential format', 'credential', {
       hasId: !!credential.id,
@@ -132,11 +152,16 @@ export async function joinCallback(
   }
 
   try {
-    const responseCallback = await api<APIDefaultResponse>(
+    const responseCallback = await internalApi<JoinCallbackResponse>(
       '/join/callback',
       'POST',
       {
-        publicKey: credential,
+        response: credential,
+        accountName,
+        recipientPublicKey,
+        recipientData,
+        mnemonic,
+        password,
       },
       {
         Authorization: `Bearer ${accessToken.trim()}`,
@@ -158,7 +183,6 @@ export async function joinCallback(
         throw responseCallback.errorDetails;
       }
 
-      // Map common join callback errors
       if (responseCallback.statusCode === 401) {
         throw new AuthenticationError('Invalid or expired access token', ErrorCode.UNAUTHORIZED, {
           tokenPrefix: accessToken.substring(0, 8),
@@ -183,14 +207,25 @@ export async function joinCallback(
       });
     }
 
-    if (!responseCallback.data || !responseCallback.data.accessToken || !responseCallback.data.refreshToken) {
+    if (
+      !responseCallback.data ||
+      !responseCallback.data.accessToken ||
+      !responseCallback.data.refreshToken ||
+      !responseCallback.data.recipientData ||
+      !responseCallback.data.mnemonic
+    ) {
       throw new WebAuthnError('Invalid response: missing authentication tokens', ErrorCode.PASSKEY_CREATION_FAILED, {
         tokenPrefix: accessToken.substring(0, 8),
         sessionId: sessionId.substring(0, 8),
       });
     }
 
-    const { accessToken: newAccessToken, refreshToken } = responseCallback.data;
+    const {
+      accessToken: newAccessToken,
+      refreshToken,
+      recipientData: newRecipientData,
+      mnemonic: newMnemonic,
+    } = responseCallback.data;
 
     logger.debug('Passkey creation successful:', {
       tokenPrefix: accessToken.substring(0, 8) + '***',
@@ -203,7 +238,9 @@ export async function joinCallback(
     return {
       success: true,
       accessToken: newAccessToken,
-      refreshToken: refreshToken,
+      refreshToken,
+      recipientData: newRecipientData,
+      mnemonic: newMnemonic,
     };
   } catch (error) {
     if (isEaseSDKError(error)) {
