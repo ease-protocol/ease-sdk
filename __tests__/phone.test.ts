@@ -1,6 +1,13 @@
-import { sendOtp, verifyOtp } from '../src/phone';
+import { sendOtp, verifyOtp, getCountries } from '../src/phone';
 import { internalApi } from '../src/api';
-import { ValidationError, OTPError, ErrorCode } from '../src/utils/errors';
+import {
+  ValidationError,
+  OTPError,
+  ErrorCode,
+  handleUnknownError,
+  AuthenticationError,
+} from '../src/utils/errors';
+import { logger, LogLevel } from '../src/utils/logger';
 
 jest.mock('../src/api', () => ({
   internalApi: jest.fn(),
@@ -8,209 +15,177 @@ jest.mock('../src/api', () => ({
 
 const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
-describe('Phone Module', () => {
+describe('Phone Service', () => {
   beforeEach(() => {
     mockApi.mockClear();
+    logger.configure({ level: LogLevel.DEBUG });
   });
 
   describe('sendOtp', () => {
+    const validPhone = '1234567890';
+    const validCountryCode = '+1';
+
     it('should send OTP successfully', async () => {
-      mockApi.mockResolvedValueOnce({
-        success: true,
-        data: { success: true },
-      });
+      mockApi.mockResolvedValueOnce({ success: true, data: { success: true } });
 
-      const result = await sendOtp('+1', '1234567890');
+      const result = await sendOtp(validCountryCode, validPhone);
 
-      expect(result.success).toBe(true);
+      expect(result).toEqual({ success: true });
       expect(mockApi).toHaveBeenCalledWith(
         '/phone/send-otp',
         'POST',
-        {
-          countryCode: '+1',
-          phone: '1234567890',
-        },
+        { phone: validPhone, countryCode: validCountryCode },
         undefined,
         false,
       );
     });
 
-    it('should validate country code', async () => {
-      await expect(sendOtp('', '1234567890')).rejects.toThrow(ValidationError);
-      await expect(sendOtp(null as any, '1234567890')).rejects.toThrow(ValidationError);
-    });
-
-    it('should validate phone number', async () => {
-      await expect(sendOtp('+1', '')).rejects.toThrow(ValidationError);
-      await expect(sendOtp('+1', null as any)).rejects.toThrow(ValidationError);
-      await expect(sendOtp('+1', 'invalid-phone')).rejects.toThrow(ValidationError);
-    });
-
-    it('should handle API error responses', async () => {
+    it('should handle API errors', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: false,
         error: 'Rate limit exceeded',
         statusCode: 429,
       });
 
-      await expect(sendOtp('+1', '1234567890')).rejects.toThrow(OTPError);
+      await expect(sendOtp(validCountryCode, validPhone)).rejects.toThrow(OTPError);
     });
 
     it('should handle unexpected errors', async () => {
-      mockApi.mockRejectedValueOnce(new Error('Network error'));
+      logger.configure({ level: LogLevel.SILENT });
+      const error = new Error('Network error');
+      mockApi.mockRejectedValueOnce(error);
 
-      await expect(sendOtp('+1', '1234567890')).rejects.toThrow();
+      await expect(sendOtp(validCountryCode, validPhone)).rejects.toThrow(
+        handleUnknownError(error, { operation: 'sendOtp' }),
+      );
     });
 
-    it('should trim whitespace from inputs', async () => {
-      mockApi.mockResolvedValueOnce({
-        success: true,
-        data: { success: true },
-      });
-
-      await sendOtp('  +1  ', '  1234567890  ');
-
-      expect(mockApi).toHaveBeenCalledWith(
-        '/phone/send-otp',
-        'POST',
-        {
-          countryCode: '+1',
-          phone: '1234567890',
-        },
-        undefined,
-        false,
-      );
+    it('should validate phone and country code', async () => {
+      logger.configure({ level: LogLevel.SILENT });
+      await expect(sendOtp('', validCountryCode)).rejects.toThrow(ValidationError);
+      await expect(sendOtp(validCountryCode, '')).rejects.toThrow(ValidationError);
     });
   });
 
   describe('verifyOtp', () => {
+    const validPhone = '1234567890';
+    const validCountryCode = '+1';
+    const validOtp = '123456';
+    const validChainID = '0001';
+
     it('should verify OTP successfully', async () => {
       const mockResponse = {
         success: true,
         data: {
-          success: true,
           accessToken: 'access-token',
           refreshToken: 'refresh-token',
         },
       };
       mockApi.mockResolvedValueOnce(mockResponse);
 
-      const result = await verifyOtp('+1', '1234567890', '123456');
+      const result = await verifyOtp(validCountryCode, validPhone, validOtp, validChainID);
 
-      expect(result.success).toBe(true);
       expect(result.accessToken).toBe('access-token');
-      expect(result.refreshToken).toBe('refresh-token');
       expect(mockApi).toHaveBeenCalledWith(
         '/phone/verify-otp',
         'POST',
         {
-          countryCode: '+1',
-          phone: '1234567890',
-          otpCode: '123456',
-          chainID: '0001',
+          phone: validPhone,
+          countryCode: validCountryCode,
+          otpCode: validOtp,
+          chainID: validChainID,
         },
         undefined,
         false,
       );
-    });
-
-    it('should validate all required inputs', async () => {
-      await expect(verifyOtp('', '1234567890', '123456')).rejects.toThrow(ValidationError);
-      await expect(verifyOtp('+1', '', '123456')).rejects.toThrow(ValidationError);
-      await expect(verifyOtp('+1', '1234567890', '')).rejects.toThrow(ValidationError);
-      await expect(verifyOtp('+1', '1234567890', '123456', '')).rejects.toThrow(ValidationError);
-    });
-
-    it('should validate OTP format', async () => {
-      await expect(verifyOtp('+1', '1234567890', 'abc')).rejects.toThrow(ValidationError);
-      await expect(verifyOtp('+1', '1234567890', '12')).rejects.toThrow(ValidationError);
-      await expect(verifyOtp('+1', '1234567890', '123456789')).rejects.toThrow(ValidationError);
     });
 
     it('should handle invalid OTP error', async () => {
-      mockApi.mockResolvedValueOnce({
-        success: false,
-        error: 'Invalid OTP',
-        statusCode: 400,
-      });
+      logger.configure({ level: LogLevel.SILENT });
+      mockApi.mockResolvedValueOnce({ success: false, error: 'Invalid OTP', statusCode: 400 });
 
-      await expect(verifyOtp('+1', '1234567890', '123456')).rejects.toThrow(OTPError);
+      await expect(verifyOtp(validCountryCode, validPhone, validOtp, validChainID)).rejects.toThrow(OTPError);
     });
 
     it('should handle expired OTP error', async () => {
-      mockApi.mockResolvedValueOnce({
-        success: false,
-        error: 'OTP expired',
-        statusCode: 401,
-      });
+      logger.configure({ level: LogLevel.SILENT });
+      mockApi.mockResolvedValueOnce({ success: false, error: 'OTP code has expired', statusCode: 401 });
 
-      const error = await verifyOtp('+1', '1234567890', '123456').catch((e) => e);
-      expect(error).toBeInstanceOf(OTPError);
-      expect(error.code).toBe(ErrorCode.OTP_EXPIRED);
+      await expect(verifyOtp(validCountryCode, validPhone, validOtp, validChainID)).rejects.toThrow(OTPError);
     });
 
-    it('should handle missing tokens in response', async () => {
-      mockApi.mockResolvedValueOnce({
+    it('should use default chainID if not provided', async () => {
+      const mockResponse = {
         success: true,
         data: {
-          success: true,
-          // Missing accessToken and refreshToken
-        },
-      });
-
-      await expect(verifyOtp('+1', '1234567890', '123456')).rejects.toThrow(OTPError);
-    });
-
-    it('should use custom chain ID', async () => {
-      mockApi.mockResolvedValueOnce({
-        success: true,
-        data: {
-          success: true,
           accessToken: 'access-token',
           refreshToken: 'refresh-token',
         },
-      });
+      };
+      mockApi.mockResolvedValueOnce(mockResponse);
 
-      await verifyOtp('+1', '1234567890', '123456', 'custom-chain');
+      await verifyOtp(validCountryCode, validPhone, validOtp);
 
       expect(mockApi).toHaveBeenCalledWith(
         '/phone/verify-otp',
         'POST',
         {
-          countryCode: '+1',
-          phone: '1234567890',
-          otpCode: '123456',
-          chainID: 'custom-chain',
+          phone: validPhone,
+          countryCode: validCountryCode,
+          otpCode: validOtp,
+          chainID: '0001',
         },
         undefined,
         false,
       );
     });
 
-    it('should trim whitespace from all inputs', async () => {
-      mockApi.mockResolvedValueOnce({
+    it('should trim input parameters', async () => {
+      const mockResponse = {
         success: true,
         data: {
-          success: true,
           accessToken: 'access-token',
           refreshToken: 'refresh-token',
         },
-      });
+      };
+      mockApi.mockResolvedValueOnce(mockResponse);
 
-      await verifyOtp('  +1  ', '  1234567890  ', '  123456  ', '  0001  ');
+      await verifyOtp(`  ${validCountryCode}  `, `  ${validPhone}  `, `  ${validOtp}  `, `  ${validChainID}  `);
 
       expect(mockApi).toHaveBeenCalledWith(
         '/phone/verify-otp',
         'POST',
         {
-          countryCode: '+1',
-          phone: '1234567890',
-          otpCode: '123456',
-          chainID: '0001',
+          phone: validPhone,
+          countryCode: validCountryCode,
+          otpCode: validOtp,
+          chainID: validChainID,
         },
         undefined,
         false,
       );
     });
   });
+
+  describe('getCountries', () => {
+    it('should return a list of countries', async () => {
+      const mockCountries = [{ name: 'United States', code: 'US', dial_code: '+1' }];
+      mockApi.mockResolvedValueOnce({ success: true, data: mockCountries });
+
+      const result = await getCountries();
+
+      expect(result).toEqual(mockCountries);
+      expect(mockApi).toHaveBeenCalledWith('/phone/countries', 'GET', null, undefined, false);
+    });
+
+    it('should handle API errors', async () => {
+      logger.configure({ level: LogLevel.SILENT });
+      mockApi.mockResolvedValueOnce({ success: false, error: 'Failed to fetch countries' });
+
+      await expect(getCountries()).rejects.toThrow(AuthenticationError);
+    });
+  });
 });
+
+

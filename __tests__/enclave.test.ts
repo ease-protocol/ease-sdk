@@ -2,6 +2,7 @@ import { getAttestation } from '../src/enclave';
 import { internalApi } from '../src/api';
 import { EaseSDKError, ErrorCode } from '../src/utils/errors';
 import * as crypto from '../src/utils/crypto';
+import { logger, LogLevel } from '../src/utils/logger';
 
 jest.mock('../src/api', () => ({
   internalApi: jest.fn(),
@@ -15,6 +16,7 @@ describe('Enclave Module', () => {
   beforeEach(() => {
     mockApi.mockClear();
     mockCrypto.parseAttestationDocument.mockClear();
+    logger.configure({ level: LogLevel.DEBUG });
   });
 
   describe('getAttestation', () => {
@@ -54,6 +56,7 @@ describe('Enclave Module', () => {
     });
 
     it('should handle API error responses', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: false,
         error: 'Service unavailable',
@@ -66,6 +69,7 @@ describe('Enclave Module', () => {
     });
 
     it('should handle missing data in response', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: true,
         data: null,
@@ -75,6 +79,7 @@ describe('Enclave Module', () => {
     });
 
     it('should handle unexpected errors', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockRejectedValueOnce(new Error('Network error'));
 
       await expect(getAttestation()).rejects.toThrow();

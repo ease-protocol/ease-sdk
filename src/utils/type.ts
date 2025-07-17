@@ -123,6 +123,14 @@ export type JoinResponse = {
   sessionId: string;
 };
 
+export type JoinCallbackResponse = {
+  success: boolean;
+  accessToken: string;
+  refreshToken: string;
+  recipientData: RecipientData;
+  mnemonic: string;
+};
+
 export type Transaction = {
   id: string;
   type: 'in' | 'out';
@@ -163,6 +171,7 @@ export type CreateTransactionResponse = {
   params: any;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type RecipientData<T = unknown> = {
   data: string;
   encryptedKey: string;

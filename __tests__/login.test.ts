@@ -1,6 +1,12 @@
 import { login, loginCallback } from '../src/login';
 import { internalApi } from '../src/api';
-import { AuthenticationError, WebAuthnError, ValidationError, ErrorCode } from '../src/utils/errors';
+import {
+  AuthenticationError,
+  WebAuthnError,
+  ValidationError,
+  ErrorCode,
+} from '../src/utils/errors';
+import { logger, LogLevel } from '../src/utils/logger';
 
 jest.mock('../src/api', () => ({
   internalApi: jest.fn(),
@@ -11,6 +17,7 @@ const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 describe('Login Module', () => {
   beforeEach(() => {
     mockApi.mockClear();
+    logger.configure({ level: LogLevel.DEBUG });
   });
 
   describe('login', () => {
@@ -36,6 +43,7 @@ describe('Login Module', () => {
     });
 
     it('should handle API error responses', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: false,
         error: 'Service unavailable',
@@ -48,6 +56,7 @@ describe('Login Module', () => {
     });
 
     it('should handle missing login data', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: true,
         data: null,
@@ -57,6 +66,7 @@ describe('Login Module', () => {
     });
 
     it('should handle missing session ID', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: true,
         data: {
@@ -74,6 +84,7 @@ describe('Login Module', () => {
     });
 
     it('should handle missing publicKey', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: true,
         data: {},
@@ -86,6 +97,7 @@ describe('Login Module', () => {
     });
 
     it('should handle unexpected errors', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockRejectedValueOnce(new Error('Network error'));
 
       await expect(login()).rejects.toThrow();
@@ -133,12 +145,14 @@ describe('Login Module', () => {
     });
 
     it('should validate required inputs', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       await expect(loginCallback(null as any, validSessionId)).rejects.toThrow(ValidationError);
       await expect(loginCallback(mockCredential, '')).rejects.toThrow(ValidationError);
       await expect(loginCallback(mockCredential, null as any)).rejects.toThrow(ValidationError);
     });
 
     it('should validate credential format', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       const invalidCredential = {
         ...mockCredential,
         id: '',
@@ -148,6 +162,7 @@ describe('Login Module', () => {
     });
 
     it('should validate credential type', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       const invalidCredential = {
         ...mockCredential,
         type: 'invalid-type' as any,
@@ -157,6 +172,7 @@ describe('Login Module', () => {
     });
 
     it('should handle authentication failed error', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: false,
         error: 'Invalid credentials',
@@ -169,6 +185,7 @@ describe('Login Module', () => {
     });
 
     it('should handle invalid assertion error', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: false,
         error: 'Invalid assertion',
@@ -181,6 +198,7 @@ describe('Login Module', () => {
     });
 
     it('should handle missing tokens in response', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: true,
         data: {
@@ -193,6 +211,7 @@ describe('Login Module', () => {
     });
 
     it('should handle general login failure', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: false,
         error: 'Login failed',
@@ -205,6 +224,7 @@ describe('Login Module', () => {
     });
 
     it('should handle unexpected errors', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockRejectedValueOnce(new Error('Network error'));
 
       await expect(loginCallback(mockCredential, validSessionId)).rejects.toThrow();

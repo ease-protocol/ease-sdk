@@ -1,6 +1,7 @@
 import { getGoogleOAuthURL, verifyGoogleOAuthCallback } from '../src/google';
 import { internalApi } from '../src/api';
 import { AuthenticationError, ErrorCode } from '../src/utils/errors';
+import { logger, LogLevel } from '../src/utils/logger';
 
 jest.mock('../src/api', () => ({
   internalApi: jest.fn(),
@@ -11,6 +12,7 @@ const mockInternalApi = internalApi as jest.Mock;
 describe('Google OAuth', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    logger.configure({ level: LogLevel.DEBUG });
   });
 
   describe('getGoogleOAuthURL', () => {
@@ -31,6 +33,7 @@ describe('Google OAuth', () => {
     });
 
     it('should throw an AuthenticationError on failure', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       const mockResponse = {
         success: false,
         error: 'Failed to get Google OAuth URL',
@@ -64,10 +67,17 @@ describe('Google OAuth', () => {
       const result = await verifyGoogleOAuthCallback(mockCallbackData);
 
       expect(result).toEqual(mockResponse.data);
-      expect(internalApi).toHaveBeenCalledWith('/oauth/google/callback', 'POST', mockCallbackData, undefined, false);
+      expect(internalApi).toHaveBeenCalledWith(
+        '/oauth/google/callback',
+        'POST',
+        mockCallbackData,
+        undefined,
+        false,
+      );
     });
 
     it('should throw an AuthenticationError on failure', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       const mockCallbackData = {
         code: 'test_code',
         state: 'test_state',
@@ -86,3 +96,4 @@ describe('Google OAuth', () => {
     });
   });
 });
+

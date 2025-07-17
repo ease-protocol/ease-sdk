@@ -1,6 +1,11 @@
 import { logout } from '../src/logout';
 import { internalApi } from '../src/api';
-import { ValidationError, AuthenticationError, ErrorCode } from '../src/utils/errors';
+import {
+  ValidationError,
+  AuthenticationError,
+  ErrorCode,
+} from '../src/utils/errors';
+import { logger, LogLevel } from '../src/utils/logger';
 
 jest.mock('../src/api', () => ({
   internalApi: jest.fn(),
@@ -11,6 +16,7 @@ const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 describe('Logout Module', () => {
   beforeEach(() => {
     mockApi.mockClear();
+    logger.configure({ level: LogLevel.DEBUG });
   });
 
   describe('logout', () => {
@@ -34,12 +40,14 @@ describe('Logout Module', () => {
     });
 
     it('should validate access token', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       await expect(logout('')).rejects.toThrow(ValidationError);
       await expect(logout(null as any)).rejects.toThrow(ValidationError);
       await expect(logout('short')).rejects.toThrow(ValidationError);
     });
 
     it('should handle unauthorized error', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: false,
         error: 'Unauthorized',
@@ -52,6 +60,7 @@ describe('Logout Module', () => {
     });
 
     it('should handle general logout failure', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({
         success: false,
         error: 'Logout failed',
@@ -64,6 +73,7 @@ describe('Logout Module', () => {
     });
 
     it('should handle network errors', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       mockApi.mockRejectedValueOnce(new Error('Network error'));
 
       await expect(logout(validAccessToken)).rejects.toThrow();
@@ -87,6 +97,7 @@ describe('Logout Module', () => {
     });
 
     it('should handle SDK error responses properly', async () => {
+      logger.configure({ level: LogLevel.SILENT });
       const mockError = new AuthenticationError('Token expired', ErrorCode.UNAUTHORIZED);
       mockApi.mockResolvedValueOnce({
         success: false,
