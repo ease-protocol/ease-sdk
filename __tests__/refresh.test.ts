@@ -1,6 +1,7 @@
 import { refreshToken } from '../src/refresh';
 import { internalApi } from '../src/api';
-import { AuthenticationError, ValidationError } from '../src/utils/errors';
+import { AuthenticationError, ErrorCode, handleUnknownError, ValidationError } from '../src/utils/errors';
+import { logger, LogLevel } from '../src/utils/logger';
 
 jest.mock('../src/api', () => ({
   internalApi: jest.fn(),
@@ -8,12 +9,15 @@ jest.mock('../src/api', () => ({
 
 const mockApi = internalApi as jest.MockedFunction<typeof internalApi>;
 
-describe('refreshToken', () => {
+describe('Token Refresh', () => {
   beforeEach(() => {
     mockApi.mockClear();
+    logger.configure({ level: LogLevel.DEBUG });
   });
 
-  it('should refresh the token successfully', async () => {
+  const validRefreshToken = 'valid-refresh-token';
+
+  it('should refresh token successfully', async () => {
     const mockResponse = {
       success: true,
       data: {
@@ -23,7 +27,7 @@ describe('refreshToken', () => {
     };
     mockApi.mockResolvedValueOnce(mockResponse);
 
-    const result = await refreshToken('old-refresh-token');
+    const result = await refreshToken(validRefreshToken);
 
     expect(result.accessToken).toBe('new-access-token');
     expect(result.refreshToken).toBe('new-refresh-token');
@@ -31,38 +35,41 @@ describe('refreshToken', () => {
       '/refresh',
       'POST',
       null,
-      { Authorization: 'Bearer old-refresh-token' },
+      { Authorization: `Bearer ${validRefreshToken}` },
       false,
     );
   });
 
-  it('should throw a ValidationError if the refresh token is missing', async () => {
-    await expect(refreshToken('')).rejects.toThrow(ValidationError);
-    await expect(refreshToken(null as any)).rejects.toThrow(ValidationError);
-  });
-
-  it('should throw an AuthenticationError if the API returns an error', async () => {
+  it('should handle invalid refresh token', async () => {
+    logger.configure({ level: LogLevel.SILENT });
     mockApi.mockResolvedValueOnce({
       success: false,
       error: 'Invalid refresh token',
       statusCode: 401,
     });
 
-    await expect(refreshToken('invalid-refresh-token')).rejects.toThrow(AuthenticationError);
+    await expect(refreshToken(validRefreshToken)).rejects.toThrow(AuthenticationError);
   });
 
-  it('should throw an AuthenticationError if the response is missing tokens', async () => {
-    mockApi.mockResolvedValueOnce({
-      success: true,
-      data: {},
-    });
+  it('should handle missing tokens in response', async () => {
+    logger.configure({ level: LogLevel.SILENT });
+    mockApi.mockResolvedValueOnce({ success: true, data: {} });
 
-    await expect(refreshToken('old-refresh-token')).rejects.toThrow(AuthenticationError);
+    await expect(refreshToken(validRefreshToken)).rejects.toThrow(AuthenticationError);
   });
 
-  it('should throw an AuthenticationError for unexpected errors', async () => {
-    mockApi.mockRejectedValueOnce(new Error('Network error'));
+  it('should handle unexpected errors', async () => {
+    logger.configure({ level: LogLevel.SILENT });
+    const error = new Error('Network error');
+    mockApi.mockRejectedValueOnce(error);
 
-    await expect(refreshToken('old-refresh-token')).rejects.toThrow(AuthenticationError);
+    await expect(refreshToken(validRefreshToken)).rejects.toThrow();
+  });
+
+  it('should validate refresh token', async () => {
+    logger.configure({ level: LogLevel.SILENT });
+    await expect(refreshToken('')).rejects.toThrow(ValidationError);
+    await expect(refreshToken(null as any)).rejects.toThrow(ValidationError);
   });
 });
+

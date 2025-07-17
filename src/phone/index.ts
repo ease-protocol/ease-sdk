@@ -1,8 +1,8 @@
 import { internalApi as api } from '../api';
-import { APIDefaultResponse, SendOtpResp } from '../utils/type';
+import { APIDefaultResponse, SendOtpResp, Country } from '../utils/type';
 import { logger } from '../utils/logger';
 
-import { OTPError, ValidationError, ErrorCode, handleUnknownError, isEaseSDKError } from '../utils/errors';
+import { OTPError, ValidationError, ErrorCode, handleUnknownError, isEaseSDKError, AuthenticationError } from '../utils/errors';
 
 export async function sendOtp(countryCode: string, phone: string): Promise<{ success: boolean }> {
   // Input validation
@@ -180,6 +180,52 @@ export async function verifyOtp(
     });
 
     logger.error('Unexpected error in verifyOtp:', enhancedError);
+    throw enhancedError;
+  }
+}
+
+export async function getCountries(): Promise<Country[]> {
+  try {
+    const response = await api<Country[]>(
+      '/phone/countries',
+      'GET',
+      null,
+      undefined,
+      false,
+    );
+
+    if (!response.success) {
+      logger.error('Failed to fetch countries:', {
+        error: response.error,
+        statusCode: response.statusCode,
+      });
+
+      if (response.errorDetails && isEaseSDKError(response.errorDetails)) {
+        throw response.errorDetails;
+      }
+
+      throw new AuthenticationError(
+        response.error || 'Failed to fetch countries',
+        ErrorCode.AUTHENTICATION_FAILED,
+      );
+    }
+
+    if (!response.data) {
+      throw new AuthenticationError(
+        'Invalid response: missing countries data',
+        ErrorCode.AUTHENTICATION_FAILED,
+      );
+    }
+
+    return response.data;
+  } catch (error) {
+    if (isEaseSDKError(error)) {
+      throw error;
+    }
+
+    const enhancedError = handleUnknownError(error, { operation: 'getCountries' });
+
+    logger.error('Unexpected error in getCountries:', enhancedError);
     throw enhancedError;
   }
 }
