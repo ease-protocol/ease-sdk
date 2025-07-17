@@ -160,6 +160,7 @@ export type CreateKeysInput = {
     password: string;
   }>;
 };
+
 export type CreateKeysResponse = {
   recipientData: RecipientData<{ mnemonic: string }>;
 };
