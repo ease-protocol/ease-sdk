@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.0.38",
+  "version": "1.0.48",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -71,6 +71,11 @@
       "types": "./dist/refresh/index.d.ts",
       "import": "./dist/refresh/index.mjs",
       "require": "./dist/refresh/index.js"
+    },
+    "./google": {
+      "types": "./dist/google/index.d.ts",
+      "import": "./dist/google/index.mjs",
+      "require": "./dist/google/index.js"
     },
     "./package.json": "./package.json"
   },

@@ -152,6 +152,7 @@ export type CreateKeysInput = {
     password: string;
   }>;
 };
+
 export type CreateKeysResponse = {
   recipientData: RecipientData<{ mnemonic: string }>;
 };
@@ -197,4 +198,21 @@ export type SignTransactionCallbackInput = {
 export type SignTransactionCallbackResponse = {
   coin: string;
   response: any;
+};
+
+export type GoogleOAuthURLResponse = {
+  success: boolean;
+  authURL: string;
+};
+
+export type GoogleOAuthCallbackRequest = {
+  code: string;
+  state: string;
+  chainID: string;
+};
+
+export type GoogleOAuthCallbackResponse = {
+  success: boolean;
+  accessToken: string;
+  refreshToken: string;
 };

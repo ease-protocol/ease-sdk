@@ -13,6 +13,7 @@ export default defineConfig({
     'src/utils/type.ts',
     'src/utils/crypto.ts',
     'src/refresh/index.ts',
+    'src/google/index.ts',
   ], // ← point to your file(s)
   format: ['esm', 'cjs'],
   outDir: 'dist',

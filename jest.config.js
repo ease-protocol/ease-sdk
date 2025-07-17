@@ -16,7 +16,7 @@ module.exports = {
     '^.+\\.ts$': 'ts-jest',
     '^.+\\.js$': 'babel-jest',
   },
-  transformIgnorePatterns: ['/node_modules/(?!(cbor2|@sentry/react-native|react-native|node-fetch)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!cbor2|@sentry/react-native|react-native|node-fetch|@ease-protocol)'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
