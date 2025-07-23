@@ -139,7 +139,7 @@ export async function decryptRecipientData(privateKeyBase64: string, recipientDa
   try {
     const url = `https://etherscan-proxy-am1u.vercel.app/api/decrypt`;
     logger.debug(`Requesting decryption from internal API: ${url}`);
-    const response = await internalApi<any>(url, 'POST', { privateKeyBase64, recipientData }, undefined, false, true);
+    const response = await internalApi<any>(url, 'POST', { privateKeyBase64, data: recipientData }, undefined, false, true);
 
     if (!response.data) {
       logger.error('Failed to decrypt data: No data received', response);

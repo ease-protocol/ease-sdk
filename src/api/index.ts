@@ -44,14 +44,15 @@ export async function internalApi<T>(
     };
 
     if (body !== null && method !== 'GET' && method !== 'HEAD') {
-      const bodyString = JSON.stringify(
-        path.includes('callback') && !path.includes('transaction') ? { response: body.publicKey ?? body } : body,
+      const bodyString = JSON.stringify(body
+        // path.includes('callback') && !path.includes('transaction') ? { response: body.publicKey ?? body } : body,
       );
 
-      logger.debug(`Request body for ${fullUrl}:`, bodyString);
-
+      
       options.body = bodyString;
     }
+    
+    logger.debug(`Request options for ${fullUrl}:`, method, headers, options.body);
 
     const response = await fetch(fullUrl, options);
 
@@ -80,7 +81,15 @@ export async function internalApi<T>(
         };
       }
 
+      if (errorData) {
+        logger.error('API error response:', errorData);
+      }
+
       const apiError = createErrorFromAPIResponse(response.status, errorData, { url, method, headers });
+
+      if(apiError) {
+        logger.error('API error:', apiError);
+      }
 
       return {
         success: false,
@@ -113,6 +122,8 @@ export async function internalApi<T>(
       headers: response.headers,
     };
   } catch (error: any) {
+    logger.error("** error: ", error)
+
     if (error.name === 'AbortError') {
       logger.error('Network request timed out:', {
         url,

@@ -151,7 +151,7 @@ export async function joinCallback(
     });
   }
 
-  try {
+  try { 
     const responseCallback = await internalApi<JoinCallbackResponse>(
       '/join/callback',
       'POST',
@@ -167,7 +167,7 @@ export async function joinCallback(
         Authorization: `Bearer ${accessToken.trim()}`,
         'X-Session-Id': sessionId.trim(),
       },
-      false,
+      false, false
     );
 
     if (!responseCallback.success) {
@@ -211,9 +211,10 @@ export async function joinCallback(
       !responseCallback.data ||
       !responseCallback.data.accessToken ||
       !responseCallback.data.refreshToken ||
-      !responseCallback.data.recipientData ||
-      !responseCallback.data.mnemonic
+      !responseCallback.data.recipientData
     ) {
+      logger.error('Invalid response: missing required fields', {responseCallback});
+
       throw new WebAuthnError('Invalid response: missing authentication tokens', ErrorCode.PASSKEY_CREATION_FAILED, {
         tokenPrefix: accessToken.substring(0, 8),
         sessionId: sessionId.substring(0, 8),
@@ -243,6 +244,8 @@ export async function joinCallback(
       mnemonic: newMnemonic,
     };
   } catch (error) {
+    logger.error('** Unexpected error in joinCallback:', error);
+
     if (isEaseSDKError(error)) {
       throw error;
     }
