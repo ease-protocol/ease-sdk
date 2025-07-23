@@ -72,4 +72,3 @@ describe('Token Refresh', () => {
     await expect(refreshToken(null as any)).rejects.toThrow(ValidationError);
   });
 });
-

@@ -67,13 +67,7 @@ describe('Google OAuth', () => {
       const result = await verifyGoogleOAuthCallback(mockCallbackData);
 
       expect(result).toEqual(mockResponse.data);
-      expect(internalApi).toHaveBeenCalledWith(
-        '/oauth/google/callback',
-        'POST',
-        mockCallbackData,
-        undefined,
-        false,
-      );
+      expect(internalApi).toHaveBeenCalledWith('/oauth/google/callback', 'POST', mockCallbackData, undefined, false);
     });
 
     it('should throw an AuthenticationError on failure', async () => {
@@ -96,4 +90,3 @@ describe('Google OAuth', () => {
     });
   });
 });
-

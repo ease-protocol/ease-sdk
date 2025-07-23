@@ -46,8 +46,10 @@ export async function join(accessToken: string, displayName: string): Promise<Jo
       }
 
       if (response.statusCode === 401) {
-        throw new AuthenticationError('Invalid or expired access token', ErrorCode.UNAUTHORIZED, 
-          { tokenPrefix: accessToken.substring(0, 8), displayName });
+        throw new AuthenticationError('Invalid or expired access token', ErrorCode.UNAUTHORIZED, {
+          tokenPrefix: accessToken.substring(0, 8),
+          displayName,
+        });
       }
 
       throw new WebAuthnError(
@@ -60,7 +62,7 @@ export async function join(accessToken: string, displayName: string): Promise<Jo
     if (!response.data) {
       throw new WebAuthnError('Invalid response: missing join data', ErrorCode.PASSKEY_CREATION_FAILED, {
         tokenPrefix: accessToken.substring(0, 8),
-        displayName
+        displayName,
       });
     }
 
@@ -79,11 +81,10 @@ export async function join(accessToken: string, displayName: string): Promise<Jo
     if (!sessionId) {
       logger.warn('Missing session ID in join response headers');
 
-      throw new WebAuthnError(
-        'Invalid response: missing session ID',
-        ErrorCode.PASSKEY_CREATION_FAILED,
-        { tokenPrefix: accessToken.substring(0, 8), displayName },
-      );
+      throw new WebAuthnError('Invalid response: missing session ID', ErrorCode.PASSKEY_CREATION_FAILED, {
+        tokenPrefix: accessToken.substring(0, 8),
+        displayName,
+      });
     }
 
     logger.debug('Join options retrieved successfully:', {
@@ -103,7 +104,9 @@ export async function join(accessToken: string, displayName: string): Promise<Jo
 
     const enhancedError = handleUnknownError(error, {
       operation: 'join',
-      tokenPrefix: accessToken.substring(0, 8), displayName});
+      tokenPrefix: accessToken.substring(0, 8),
+      displayName,
+    });
 
     logger.error('Unexpected error in join:', enhancedError);
     throw enhancedError;
@@ -151,7 +154,7 @@ export async function joinCallback(
     });
   }
 
-  try { 
+  try {
     const responseCallback = await internalApi<JoinCallbackResponse>(
       '/join/callback',
       'POST',
@@ -167,7 +170,8 @@ export async function joinCallback(
         Authorization: `Bearer ${accessToken.trim()}`,
         'X-Session-Id': sessionId.trim(),
       },
-      false, false
+      false,
+      false,
     );
 
     if (!responseCallback.success) {
@@ -213,7 +217,7 @@ export async function joinCallback(
       !responseCallback.data.refreshToken ||
       !responseCallback.data.recipientData
     ) {
-      logger.error('Invalid response: missing required fields', {responseCallback});
+      logger.error('Invalid response: missing required fields', { responseCallback });
 
       throw new WebAuthnError('Invalid response: missing authentication tokens', ErrorCode.PASSKEY_CREATION_FAILED, {
         tokenPrefix: accessToken.substring(0, 8),
