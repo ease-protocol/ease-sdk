@@ -1,3 +1,4 @@
+import { getUrl } from '../utils/urls';
 import { logger } from '../utils/logger';
 import { NetworkError, createErrorFromAPIResponse, handleUnknownError } from '../utils/errors';
 
@@ -28,7 +29,7 @@ export async function internalApi<T>(
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const baseUrl = fromEnclave ? 'https://relay.ease.tech/' : 'https://api.ease.tech/';
+    const baseUrl = fromEnclave ? getUrl('EASE_RELAY') : getUrl('EASE_API');
     const fullUrl = isAbsoluteUrl ? url : `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
 
     const urlObj = new URL(fullUrl);
@@ -44,14 +45,14 @@ export async function internalApi<T>(
     };
 
     if (body !== null && method !== 'GET' && method !== 'HEAD') {
-      const bodyString = JSON.stringify(body
+      const bodyString = JSON.stringify(
+        body,
         // path.includes('callback') && !path.includes('transaction') ? { response: body.publicKey ?? body } : body,
       );
 
-      
       options.body = bodyString;
     }
-    
+
     logger.debug(`Request options for ${fullUrl}:`, method, headers, options.body);
 
     const response = await fetch(fullUrl, options);
@@ -87,7 +88,7 @@ export async function internalApi<T>(
 
       const apiError = createErrorFromAPIResponse(response.status, errorData, { url, method, headers });
 
-      if(apiError) {
+      if (apiError) {
         logger.error('API error:', apiError);
       }
 
@@ -122,7 +123,7 @@ export async function internalApi<T>(
       headers: response.headers,
     };
   } catch (error: any) {
-    logger.error("** error: ", error)
+    logger.error('** error: ', error);
 
     if (error.name === 'AbortError') {
       logger.error('Network request timed out:', {

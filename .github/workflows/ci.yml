@@ -30,28 +30,9 @@ jobs:
       - name: Run lint
         run: npm run lint
 
+      - name: Compile project
+        run: npm run compile
+
       - name: Build project
         run: npm run build
-
-      - name: Configure Git User
-        if: success() # Only run if previous steps passed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Increase version, push and update
-        if: success() # Only run if previous steps passed
-        run: |
-          # This step will increase the patch version, create a new commit, and push it back to the PR branch.
-          # WARNING: This approach of bumping versions directly on PR branches can lead to:
-          # - Merge conflicts if multiple PRs are open simultaneously.
-          # - Unnecessary commits on PR branches.
-          # A more common practice is to bump the version on the main branch after a merge,
-          # or as part of a dedicated release workflow.
-          npm version patch -m "CI: Bump version to %s [skip ci]"
-          git push origin HEAD:${{ github.head_ref }} --follow-tags
-        env:
-          # GITHUB_TOKEN is automatically provided by GitHub Actions
-          # It needs write permissions for contents to push back to the repo.
-          # Ensure your repository's workflow permissions are configured to allow write access.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  

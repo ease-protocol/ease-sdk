@@ -7,6 +7,7 @@ export * from './enclave';
 export * from './transaction';
 export * from './refresh';
 export * from './google';
+export { setEnvironment } from './utils/environment';
 export { logger, LogLevel } from './utils/logger';
 export type { LoggerConfig } from './utils/logger';
 export { EaseSDKError, NetworkError, APIError, AuthenticationError, ValidationError, OTPError, WebAuthnError, ErrorCode, isEaseSDKError, handleUnknownError, } from './utils/errors';

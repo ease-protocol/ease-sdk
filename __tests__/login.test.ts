@@ -1,11 +1,6 @@
 import { login, loginCallback } from '../src/login';
 import { internalApi } from '../src/api';
-import {
-  AuthenticationError,
-  WebAuthnError,
-  ValidationError,
-  ErrorCode,
-} from '../src/utils/errors';
+import { AuthenticationError, WebAuthnError, ValidationError, ErrorCode } from '../src/utils/errors';
 import { logger, LogLevel } from '../src/utils/logger';
 
 jest.mock('../src/api', () => ({

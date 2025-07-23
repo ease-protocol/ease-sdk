@@ -7,6 +7,7 @@ export * from './enclave';
 export * from './transaction';
 export * from './refresh';
 export * from './google';
+export { setEnvironment } from './utils/environment';
 
 // Re-export logger, errors, and types for convenience
 export { logger, LogLevel } from './utils/logger';

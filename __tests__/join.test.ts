@@ -1,11 +1,6 @@
 import { join, joinCallback } from '../src/join';
 import { internalApi } from '../src/api';
-import {
-  ValidationError,
-  AuthenticationError,
-  WebAuthnError,
-  ErrorCode,
-} from '../src/utils/errors';
+import { ValidationError, AuthenticationError, WebAuthnError, ErrorCode } from '../src/utils/errors';
 import { RecipientData } from '../src/utils/type';
 import { logger, LogLevel } from '../src/utils/logger';
 
@@ -206,6 +201,7 @@ describe('Join Module', () => {
           'X-Session-Id': validSessionId,
         },
         false,
+        false,
       );
     });
 
@@ -222,14 +218,7 @@ describe('Join Module', () => {
         ),
       ).rejects.toThrow(ValidationError);
       await expect(
-        joinCallback(
-          mockCredential,
-          '',
-          validSessionId,
-          validAccountName,
-          validRecipientPublicKey,
-          validRecipientData,
-        ),
+        joinCallback(mockCredential, '', validSessionId, validAccountName, validRecipientPublicKey, validRecipientData),
       ).rejects.toThrow(ValidationError);
       await expect(
         joinCallback(
@@ -242,24 +231,10 @@ describe('Join Module', () => {
         ),
       ).rejects.toThrow(ValidationError);
       await expect(
-        joinCallback(
-          mockCredential,
-          validAccessToken,
-          validSessionId,
-          '',
-          validRecipientPublicKey,
-          validRecipientData,
-        ),
+        joinCallback(mockCredential, validAccessToken, validSessionId, '', validRecipientPublicKey, validRecipientData),
       ).rejects.toThrow(ValidationError);
       await expect(
-        joinCallback(
-          mockCredential,
-          validAccessToken,
-          validSessionId,
-          validAccountName,
-          '',
-          validRecipientData,
-        ),
+        joinCallback(mockCredential, validAccessToken, validSessionId, validAccountName, '', validRecipientData),
       ).rejects.toThrow(ValidationError);
       await expect(
         joinCallback(
@@ -336,4 +311,3 @@ describe('Join Module', () => {
     });
   });
 });
-
