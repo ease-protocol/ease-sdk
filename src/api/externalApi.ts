@@ -1,3 +1,4 @@
+import { getUrl } from '../utils/urls';
 import { internalApi, ApiResponse } from './index';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
@@ -18,7 +19,7 @@ export async function fetchExternalBlockchainData<T>(
     switch (coin.toUpperCase()) {
       case 'EASE':
         if (action === 'balance') {
-          url = 'https://testnet.ease.tech/v1/chain/get_currency_balance';
+          url = `${getUrl('EASE_API')}/v1/chain/get_currency_balance`;
           method = 'POST';
           body = {
             account: address,
@@ -36,7 +37,7 @@ export async function fetchExternalBlockchainData<T>(
 
           return balance as T;
         } else if (action === 'history') {
-          url = 'https://testnet.ease.tech/v2/history/get_actions';
+          url = `${getUrl('EASE_API')}/v2/history/get_actions`;
           response = await internalApi(url, method, body, undefined, false, true);
 
           if (!response.success || !Array.isArray(response.data.actions)) {
@@ -65,7 +66,7 @@ export async function fetchExternalBlockchainData<T>(
         break;
       case 'BTC':
         if (action === 'balance') {
-          url = `https://mempool.space/testnet/api/address/${address}`;
+          url = `${getUrl('MEMPOOL_SPACE')}/api/address/${address}`;
           response = await internalApi(url, method, body, undefined, false, true);
           if (!response.success || !response.data || typeof response.data.chain_stats !== 'object') {
             logger.warn(`BTC balance API returned invalid data structure for address: ${address}.`, {
@@ -76,7 +77,7 @@ export async function fetchExternalBlockchainData<T>(
           const sats = response.data.chain_stats.funded_txo_sum - response.data.chain_stats.spent_txo_sum;
           return (sats / 1e8).toFixed(8) as T;
         } else if (action === 'history') {
-          url = `https://mempool.space/testnet/api/address/${address}/txs`;
+          url = `${getUrl('MEMPOOL_SPACE')}/api/address/${address}/txs`;
           response = await internalApi(url, method, body, undefined, false, true);
           if (!response.success || !Array.isArray(response.data)) {
             logger.warn(`BTC history API returned invalid data structure for address: ${address}.`, {
@@ -94,7 +95,7 @@ export async function fetchExternalBlockchainData<T>(
               id: tx.txid,
               type: isIncoming ? 'in' : 'out',
               amount: (amountSats / 1e8).toFixed(8),
-              explorerURL: `https://mempool.space/testnet/tx/${tx.txid}`,
+              explorerURL: `${getUrl('MEMPOOL_SPACE')}/tx/${tx.txid}`,
             };
           }) as T;
         }
@@ -102,7 +103,7 @@ export async function fetchExternalBlockchainData<T>(
 
       case 'ETH':
         if (action === 'balance') {
-          url = `https://etherscan-proxy-am1u.vercel.app/api/balance?address=${address}`;
+          url = `${getUrl('ETHERSCAN_PROXY')}/api/balance?address=${address}`;
           response = await internalApi(url, method, body, undefined, false, true);
           logger.debug(`ETH balance API response for address ${coin}:`, JSON.stringify(response));
           if (!response.success || typeof response.data?.result === 'undefined') {
@@ -113,7 +114,7 @@ export async function fetchExternalBlockchainData<T>(
           }
           return (Number(response.data.result) / 1e18).toFixed(8) as T;
         } else if (action === 'history') {
-          url = `https://etherscan-proxy-am1u.vercel.app/api/history?address=${address}`;
+          url = `${getUrl('ETHERSCAN_PROXY')}/api/history?address=${address}`;
           response = await internalApi(url, method, body, undefined, false, true);
           if (!response.success || !Array.isArray(response.data?.result)) {
             logger.warn(`Etherscan API returned non-array result for transaction history for address: ${address}.`, {
@@ -127,7 +128,7 @@ export async function fetchExternalBlockchainData<T>(
               id: tx.hash,
               type,
               amount: (Number(tx.value) / 1e18).toFixed(8),
-              explorerURL: `https://sepolia.etherscan.io/tx/${tx.hash}`,
+              explorerURL: `${getUrl('SEPOLIA_ETHERSCAN')}/tx/${tx.hash}`,
             };
           }) as T;
         }

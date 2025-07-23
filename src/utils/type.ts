@@ -225,3 +225,5 @@ export type GoogleOAuthCallbackResponse = {
   accessToken: string;
   refreshToken: string;
 };
+
+export type Environment = 'develop' | 'staging' | 'production';

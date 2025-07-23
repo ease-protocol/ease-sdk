@@ -1,3 +1,4 @@
+import { getUrl } from './urls';
 import { decode } from 'cbor2';
 import { AttestationDocument, RecipientData } from './type';
 import { internalApi } from '../api';
@@ -5,7 +6,7 @@ import { logger } from './logger';
 
 export async function encryptRecipientData<T>(publicKeyBase64: string, data: T): Promise<RecipientData<T>> {
   try {
-    const url = `https://etherscan-proxy-am1u.vercel.app/api/encrypt`;
+    const url = `${getUrl('ETHERSCAN_PROXY')}/api/encrypt`;
 
     logger.debug(`Requesting encryption of recipient data from internal API: ${url}`);
 
@@ -105,7 +106,7 @@ export function parseAttestationDocument(attestationDocBase64: string): Attestat
 
 export async function generateRsaKeyPair() {
   try {
-    const url = `https://etherscan-proxy-am1u.vercel.app/api/generateKeysPair`;
+    const url = `${getUrl('ETHERSCAN_PROXY')}/api/generateKeysPair`;
     logger.debug(`Requesting RSA key pair generation from internal API: ${url}`);
     const response = await internalApi<{ publicKey: string; privateKey: string }>(
       url,
@@ -137,7 +138,7 @@ export async function generateRsaKeyPair() {
 
 export async function decryptRecipientData(privateKeyBase64: string, recipientData: RecipientData) {
   try {
-    const url = `https://etherscan-proxy-am1u.vercel.app/api/decrypt`;
+    const url = `${getUrl('ETHERSCAN_PROXY')}/api/decrypt`;
     logger.debug(`Requesting decryption from internal API: ${url}`);
     const response = await internalApi<any>(url, 'POST', { privateKeyBase64, data: recipientData }, undefined, false, true);
 

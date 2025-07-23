@@ -1,3 +1,4 @@
+import { getUrl } from '../utils/urls';
 import { EaseSDKError, ErrorCode, handleUnknownError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { Transaction } from '../utils/type'; // Assuming Transaction type is already defined in type.ts
@@ -61,9 +62,9 @@ export function explorerUrlFromResponse(coin: string, response: any): string {
     case 'EASE':
       return '';
     case 'BTC':
-      return `https://mempool.space/testnet/tx/${response}`;
+      return `${getUrl('MEMPOOL_SPACE')}/tx/${response}`;
     case 'ETH':
-      return `https://sepolia.etherscan.io/tx/${response}`;
+      return `${getUrl('SEPOLIA_ETHERSCAN')}/tx/${response}`;
     default:
       return '';
   }

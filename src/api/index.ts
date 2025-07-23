@@ -1,3 +1,4 @@
+import { getUrl } from '../utils/urls';
 import { logger } from '../utils/logger';
 import { NetworkError, createErrorFromAPIResponse, handleUnknownError } from '../utils/errors';
 
@@ -28,7 +29,7 @@ export async function internalApi<T>(
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const baseUrl = fromEnclave ? 'https://relay.ease.tech/' : 'https://api.ease.tech/';
+    const baseUrl = fromEnclave ? getUrl('EASE_RELAY') : getUrl('EASE_API');
     const fullUrl = isAbsoluteUrl ? url : `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
 
     const urlObj = new URL(fullUrl);

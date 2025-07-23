@@ -206,6 +206,7 @@ describe('Join Module', () => {
           'X-Session-Id': validSessionId,
         },
         false,
+        false,
       );
     });
 

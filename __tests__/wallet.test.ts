@@ -6,6 +6,7 @@ import {
   getWalletBalance,
   getWalletHistory,
 } from '../src/wallet';
+import { setEnvironment } from '../src/utils/environment';
 import { EaseSDKError, ErrorCode } from '../src/utils/errors';
 import { logger } from '../src/utils/logger';
 import { fetchExternalBlockchainData } from '../src/api/externalApi';
@@ -110,12 +111,16 @@ describe('wallet', () => {
   });
 
   describe('explorerUrlFromResponse', () => {
+    beforeEach(() => {
+      setEnvironment('production');
+    });
+
     it('should return explorer URL for BTC', () => {
-      expect(explorerUrlFromResponse('BTC', 'tx123')).toBe('https://mempool.space/testnet/tx/tx123');
+      expect(explorerUrlFromResponse('BTC', 'tx123')).toBe('https://mempool.space/tx/tx123');
     });
 
     it('should return explorer URL for ETH', () => {
-      expect(explorerUrlFromResponse('ETH', 'tx456')).toBe('https://sepolia.etherscan.io/tx/tx456');
+      expect(explorerUrlFromResponse('ETH', 'tx456')).toBe('https://etherscan.io/tx/tx456');
     });
 
     it('should return empty explorer URL for EASE', () => {
@@ -127,11 +132,11 @@ describe('wallet', () => {
     });
 
     it('should handle null response', () => {
-      expect(explorerUrlFromResponse('BTC', null)).toBe('https://mempool.space/testnet/tx/null');
+      expect(explorerUrlFromResponse('BTC', null)).toBe('https://mempool.space/tx/null');
     });
 
     it('should handle undefined response', () => {
-      expect(explorerUrlFromResponse('ETH', undefined)).toBe('https://sepolia.etherscan.io/tx/undefined');
+      expect(explorerUrlFromResponse('ETH', undefined)).toBe('https://etherscan.io/tx/undefined');
     });
   });
 
@@ -205,26 +210,26 @@ describe('wallet', () => {
 
     it('should get BTC wallet history', async () => {
       mockFetchExternalBlockchainData.mockResolvedValueOnce([
-        { id: 'btc_trx1', type: 'in', amount: '1.00000000', explorerURL: 'https://mempool.space/testnet/tx/btc_trx1' },
-        { id: 'btc_trx2', type: 'out', amount: '0.50000000', explorerURL: 'https://mempool.space/testnet/tx/btc_trx2' },
+        { id: 'btc_trx1', type: 'in', amount: '1.00000000', explorerURL: 'https://mempool.space/tx/btc_trx1' },
+        { id: 'btc_trx2', type: 'out', amount: '0.50000000', explorerURL: 'https://mempool.space/tx/btc_trx2' },
       ]);
       const history = await getWalletHistory('BTC', 'testAddress');
       expect(history).toEqual([
-        { id: 'btc_trx1', type: 'in', amount: '1.00000000', explorerURL: 'https://mempool.space/testnet/tx/btc_trx1' },
-        { id: 'btc_trx2', type: 'out', amount: '0.50000000', explorerURL: 'https://mempool.space/testnet/tx/btc_trx2' },
+        { id: 'btc_trx1', type: 'in', amount: '1.00000000', explorerURL: 'https://mempool.space/tx/btc_trx1' },
+        { id: 'btc_trx2', type: 'out', amount: '0.50000000', explorerURL: 'https://mempool.space/tx/btc_trx2' },
       ]);
       expect(mockFetchExternalBlockchainData).toHaveBeenCalledWith('BTC', 'testAddress', 'history');
     });
 
     it('should get ETH wallet history', async () => {
       mockFetchExternalBlockchainData.mockResolvedValueOnce([
-        { id: 'eth_trx1', type: 'in', amount: '2.00000000', explorerURL: 'https://sepolia.etherscan.io/tx/eth_trx1' },
-        { id: 'eth_trx2', type: 'out', amount: '1.00000000', explorerURL: 'https://sepolia.etherscan.io/tx/eth_trx2' },
+        { id: 'eth_trx1', type: 'in', amount: '2.00000000', explorerURL: 'https://etherscan.io/tx/eth_trx1' },
+        { id: 'eth_trx2', type: 'out', amount: '1.00000000', explorerURL: 'https://etherscan.io/tx/eth_trx2' },
       ]);
       const history = await getWalletHistory('ETH', 'testAddress');
       expect(history).toEqual([
-        { id: 'eth_trx1', type: 'in', amount: '2.00000000', explorerURL: 'https://sepolia.etherscan.io/tx/eth_trx1' },
-        { id: 'eth_trx2', type: 'out', amount: '1.00000000', explorerURL: 'https://sepolia.etherscan.io/tx/eth_trx2' },
+        { id: 'eth_trx1', type: 'in', amount: '2.00000000', explorerURL: 'https://etherscan.io/tx/eth_trx1' },
+        { id: 'eth_trx2', type: 'out', amount: '1.00000000', explorerURL: 'https://etherscan.io/tx/eth_trx2' },
       ]);
       expect(mockFetchExternalBlockchainData).toHaveBeenCalledWith('ETH', 'testAddress', 'history');
     });
