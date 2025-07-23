@@ -27,9 +27,9 @@ const urls: Record<Environment, ServiceUrls> = {
   production: {
     EASE_API: 'https://api.ease.tech',
     EASE_RELAY: 'https://relay.ease.tech',
-    MEMPOOL_SPACE: 'https://mempool.space/testnet',
+    MEMPOOL_SPACE: 'https://mempool.space',
     ETHERSCAN_PROXY: 'https://etherscan-proxy-am1u.vercel.app',
-    SEPOLIA_ETHERSCAN: 'https://sepolia.etherscan.io',
+    SEPOLIA_ETHERSCAN: 'https://etherscan.io',
   },
 };
 
