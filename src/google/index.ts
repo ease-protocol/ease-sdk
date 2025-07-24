@@ -46,13 +46,7 @@ export async function verifyGoogleOAuthCallback(
   callbackData: GoogleOAuthCallbackRequest,
 ): Promise<GoogleOAuthCallbackResponse> {
   try {
-    const response = await api<GoogleOAuthCallbackResponse>(
-      '/oauth/google',
-      'POST',
-      callbackData,
-      undefined,
-      false,
-    );
+    const response = await api<GoogleOAuthCallbackResponse>('/oauth/google', 'POST', callbackData, undefined, false);
 
     if (!response.success) {
       logger.error('Google OAuth callback failed:', {
