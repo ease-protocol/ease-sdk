@@ -26,10 +26,10 @@ describe('Google OAuth', () => {
       };
       mockInternalApi.mockResolvedValue(mockResponse);
 
-      const result = await getGoogleOAuthURL();
+      const result = await getGoogleOAuthURL('web');
 
       expect(result).toEqual(mockResponse.data);
-      expect(internalApi).toHaveBeenCalledWith('/oauth/google', 'GET');
+      expect(internalApi).toHaveBeenCalledWith('/oauth/google?platform=web', 'GET');
     });
 
     it('should throw an AuthenticationError on failure', async () => {
@@ -41,7 +41,7 @@ describe('Google OAuth', () => {
       };
       mockInternalApi.mockResolvedValue(mockResponse);
 
-      await expect(getGoogleOAuthURL()).rejects.toThrow(
+      await expect(getGoogleOAuthURL('web')).rejects.toThrow(
         new AuthenticationError('Failed to get Google OAuth URL', ErrorCode.AUTHENTICATION_FAILED),
       );
     });
@@ -67,7 +67,7 @@ describe('Google OAuth', () => {
       const result = await verifyGoogleOAuthCallback(mockCallbackData);
 
       expect(result).toEqual(mockResponse.data);
-      expect(internalApi).toHaveBeenCalledWith('/oauth/google/callback', 'POST', mockCallbackData, undefined, false);
+      expect(internalApi).toHaveBeenCalledWith('/oauth/google', 'POST', mockCallbackData, undefined, false);
     });
 
     it('should throw an AuthenticationError on failure', async () => {

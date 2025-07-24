@@ -3,9 +3,9 @@ import { logger } from '../utils/logger';
 import { AuthenticationError, ErrorCode, handleUnknownError, isEaseSDKError } from '../utils/errors';
 import { GoogleOAuthURLResponse, GoogleOAuthCallbackRequest, GoogleOAuthCallbackResponse } from '../utils/type';
 
-export async function getGoogleOAuthURL(): Promise<GoogleOAuthURLResponse> {
+export async function getGoogleOAuthURL(platform: 'web' | 'mobile'): Promise<GoogleOAuthURLResponse> {
   try {
-    const response = await api<GoogleOAuthURLResponse>('/oauth/google', 'GET');
+    const response = await api<GoogleOAuthURLResponse>(`/oauth/google?platform=${platform}`, 'GET');
 
     if (!response.success) {
       logger.error('Google OAuth URL request failed:', {
@@ -46,13 +46,7 @@ export async function verifyGoogleOAuthCallback(
   callbackData: GoogleOAuthCallbackRequest,
 ): Promise<GoogleOAuthCallbackResponse> {
   try {
-    const response = await api<GoogleOAuthCallbackResponse>(
-      '/oauth/google/callback',
-      'POST',
-      callbackData,
-      undefined,
-      false,
-    );
+    const response = await api<GoogleOAuthCallbackResponse>('/oauth/google', 'POST', callbackData, undefined, false);
 
     if (!response.success) {
       logger.error('Google OAuth callback failed:', {
