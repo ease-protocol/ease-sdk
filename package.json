@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.1.15",
+  "version": "1.1.30",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -77,7 +77,11 @@
       "import": "./dist/google/index.mjs",
       "require": "./dist/google/index.js"
     },
-    "./package.json": "./package.json"
+    "./contacts": {
+      "types": "./dist/contacts/index.d.ts",
+      "import": "./dist/contacts/index.mjs",
+      "require": "./dist/contacts/index.js"
+    }
   },
   "keywords": [],
   "author": "",
