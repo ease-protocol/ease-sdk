@@ -227,3 +227,14 @@ export type GoogleOAuthCallbackResponse = {
 };
 
 export type Environment = 'develop' | 'staging' | 'production';
+
+export type Contact = {
+  id: string;
+  accountName: string;
+  createdAt: string;
+};
+
+export type SearchUser = {
+  id: string;
+  accountName: string;
+};

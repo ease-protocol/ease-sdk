@@ -7,6 +7,7 @@ export * from './enclave';
 export * from './transaction';
 export * from './refresh';
 export * from './google';
+export * from './contacts';
 export { setEnvironment } from './utils/environment';
 
 // Re-export logger, errors, and types for convenience
@@ -66,4 +67,6 @@ export type {
   GoogleOAuthCallbackRequest,
   GoogleOAuthURLResponse,
   GoogleOAuthCallbackResponse,
+  Contact,
+  SearchUser,
 } from './utils/type';
