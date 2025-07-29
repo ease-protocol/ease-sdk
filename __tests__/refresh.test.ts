@@ -1,6 +1,6 @@
 import { refreshToken } from '../src/refresh';
 import { internalApi } from '../src/api';
-import { AuthenticationError, ErrorCode, handleUnknownError, ValidationError } from '../src/utils/errors';
+import { AuthenticationError, ValidationError } from '../src/utils/errors';
 import { logger, LogLevel } from '../src/utils/logger';
 
 jest.mock('../src/api', () => ({

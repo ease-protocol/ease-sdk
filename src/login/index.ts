@@ -88,7 +88,7 @@ export async function loginCallback(credential: PublicKeyCredential, sessionId: 
     const response = await api<APIDefaultResponse>(
       '/login/callback',
       'POST',
-      credential,
+      { response: credential },
       {
         'X-Session-Id': sessionId,
       },

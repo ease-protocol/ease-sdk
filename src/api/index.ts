@@ -57,17 +57,21 @@ export async function internalApi<T>(
 
     const response = await fetch(fullUrl, options);
 
+    logger.debug(`Response ok:${response.ok} status:${response.status} for ${fullUrl}:`);
+
+    let loggedErrorData = false;
     if (!response.ok) {
       let errorData;
       try {
         errorData = await response.json();
-        logger.error('API error response:', {
+        logger.error('API error response not ok:', {
           url,
           method,
           status: response.status,
           statusText: response.statusText,
           errorData,
         });
+        loggedErrorData = true;
       } catch (jsonError) {
         logger.error('Failed to parse error response as JSON:', {
           url,
@@ -82,7 +86,7 @@ export async function internalApi<T>(
         };
       }
 
-      if (errorData) {
+      if (errorData && !loggedErrorData) {
         logger.error('API error response:', errorData);
       }
 
