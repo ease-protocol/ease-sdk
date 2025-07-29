@@ -131,7 +131,7 @@ describe('Login Module', () => {
       expect(mockApi).toHaveBeenCalledWith(
         '/login/callback',
         'POST',
-        mockCredential,
+        { response: mockCredential },
         {
           'X-Session-Id': validSessionId,
         },
