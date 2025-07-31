@@ -1,11 +1,14 @@
+![npm version](https://img.shields.io/npm/v/@ease-protocol/ease-sdk?style=flat-square) ![Build Status](https://github.com/ease-protocol/ease-sdk/actions/workflows/ci.yml/badge.svg) ![License](https://img.shields.io/npm/l/@ease-protocol/ease-sdk?style=flat-square)
+
 # EASE SDK
 
-This repository contains the source code for the EASE SDK, providing a comprehensive set of functionalities for interacting with the EASE Protocol.
+This repository contains the source code for the EASE SDK, a comprehensive TypeScript library designed to facilitate seamless interaction with the EASE Protocol. It provides a robust and easy-to-use interface for integrating various functionalities of the EASE ecosystem into your applications.
 
 ## Table of Contents
 
 - [EASE SDK](#ease-sdk)
   - [Table of Contents](#table-of-contents)
+  - [Features](#features)
   - [Development](#development)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
@@ -24,8 +27,26 @@ This repository contains the source code for the EASE SDK, providing a comprehen
     - [Running Tests](#running-tests)
     - [Code Style](#code-style)
     - [Submitting Changes](#submitting-changes)
+  - [Support](#support)
+  - [License](#license)
   - [Publishing to npm](#publishing-to-npm)
   - [Generate a new PAT](#generate-a-new-pat)
+
+## Features
+
+The EASE SDK provides a wide range of features to interact with the EASE Protocol, including:
+
+-   **User Authentication**: Secure login and logout functionalities.
+-   **User Management**: Join and manage user accounts.
+-   **Wallet Operations**: Manage cryptocurrency wallets, including balance checks and transaction history.
+-   **Transaction Management**: Create and process various types of transactions.
+-   **Phone Integration**: OTP verification and other phone-related functionalities.
+-   **Contact Management**: Add, delete, and search for contacts within the EASE ecosystem.
+-   **Google Integration**: Seamless integration with Google services.
+-   **Secure Enclave Interaction**: Functionality for secure operations.
+-   **Token Refresh**: Automated handling of access token refreshing.
+-   **Error Handling**: Comprehensive error handling with specific error codes and messages.
+-   **Logging**: Configurable logging for development and debugging.
 
 ## Development
 
@@ -222,6 +243,17 @@ npm run format
     git push origin feature/your-feature-name
     ```
 3.  **Create a Pull Request**: Open a pull request from your fork to the `main` branch of the original repository. Provide a detailed description of your changes.
+
+## Support
+
+If you encounter any issues, have questions, or need assistance, please refer to the following resources:
+
+-   **GitHub Issues**: For bug reports and feature requests, please open an issue on our [GitHub repository](https://github.com/ease-protocol/ease-sdk/issues).
+-   **Documentation**: Refer to the [API Documentation](#api-documentation) for detailed information on SDK functionalities.
+
+## License
+
+This project is licensed under the ISC License. See the `LICENSE` file for more details.
 
 ## Publishing to npm
 
