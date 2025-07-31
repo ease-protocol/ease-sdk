@@ -3,6 +3,15 @@ import { logger } from '../utils/logger';
 
 import { AuthenticationError, ValidationError, ErrorCode, handleUnknownError, isEaseSDKError } from '../utils/errors';
 
+/**
+ * Logs out the user by invalidating the provided access token.
+ *
+ * @param {string} accessToken The access token to invalidate.
+ * @returns {Promise<void>} A promise that resolves when the logout request is successfully processed.
+ * @throws {ValidationError} If the access token is missing or invalid.
+ * @throws {AuthenticationError} If the access token is invalid or expired, or if logout otherwise fails.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function logout(accessToken: string): Promise<void> {
   // Input validation
   if (!accessToken || typeof accessToken !== 'string') {

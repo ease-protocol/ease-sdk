@@ -3,6 +3,15 @@ import { logger } from '../utils/logger';
 import { AuthenticationError, ErrorCode, ValidationError, handleUnknownError } from '../utils/errors';
 import { APIDefaultResponse } from '../utils/type';
 
+/**
+ * Refreshes the access token using a provided refresh token.
+ *
+ * @param {string} refreshToken The refresh token to use for obtaining a new access token.
+ * @returns {Promise<APIDefaultResponse>} A promise that resolves with the new access token and refresh token.
+ * @throws {ValidationError} If the refresh token is missing or invalid.
+ * @throws {AuthenticationError} If the token refresh fails due to invalid credentials, missing tokens in the response, or other authentication issues.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function refreshToken(refreshToken: string) {
   if (!refreshToken) {
     throw new ValidationError(ErrorCode.INVALID_INPUT, 'Refresh token is required.');

@@ -4,6 +4,15 @@ import { AttestationDocument, RecipientData } from './type';
 import { internalApi } from '../api';
 import { logger } from './logger';
 
+/**
+ * Encrypts recipient data using a public key.
+ *
+ * @template T The type of the data to be encrypted.
+ * @param {string} publicKeyBase64 The public key in Base64 format.
+ * @param {T} data The data to be encrypted.
+ * @returns {Promise<RecipientData<T>>} A promise that resolves with the encrypted recipient data.
+ * @throws {Error} If the encryption fails or the API returns an invalid response.
+ */
 export async function encryptRecipientData<T>(publicKeyBase64: string, data: T): Promise<RecipientData<T>> {
   try {
     const url = `${getUrl('ETHERSCAN_PROXY')}/api/encrypt`;
@@ -40,6 +49,13 @@ export async function encryptRecipientData<T>(publicKeyBase64: string, data: T):
   }
 }
 
+/**
+ * Parses a Base64 encoded attestation document.
+ *
+ * @param {string} attestationDocBase64 The Base64 encoded attestation document string.
+ * @returns {AttestationDocument} The parsed attestation document object.
+ * @throws {Error} If the Base64 string is invalid, CBOR decoding fails, or the payload is malformed.
+ */
 export function parseAttestationDocument(attestationDocBase64: string): AttestationDocument {
   logger.debug('Starting to parse attestation document.');
   try {
@@ -104,6 +120,12 @@ export function parseAttestationDocument(attestationDocBase64: string): Attestat
   }
 }
 
+/**
+ * Generates a new RSA key pair (public and private keys).
+ *
+ * @returns {Promise<{ publicKey: string; privateKey: string }>} A promise that resolves with the generated RSA public and private keys in string format.
+ * @throws {Error} If the key pair generation fails or the API returns an invalid response.
+ */
 export async function generateRsaKeyPair() {
   try {
     const url = `${getUrl('ETHERSCAN_PROXY')}/api/generateKeysPair`;
@@ -136,6 +158,14 @@ export async function generateRsaKeyPair() {
   }
 }
 
+/**
+ * Decrypts recipient data using a private key.
+ *
+ * @param {string} privateKeyBase64 The private key in Base64 format.
+ * @param {RecipientData} recipientData The encrypted recipient data.
+ * @returns {Promise<any>} A promise that resolves with the decrypted data.
+ * @throws {Error} If the decryption fails or the API returns an invalid response.
+ */
 export async function decryptRecipientData(privateKeyBase64: string, recipientData: RecipientData) {
   try {
     const url = `${getUrl('ETHERSCAN_PROXY')}/api/decrypt`;

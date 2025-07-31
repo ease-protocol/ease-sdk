@@ -10,6 +10,18 @@ import {
   isEaseSDKError,
 } from '../utils/errors';
 
+/**
+ * Initiates the join (registration) process by fetching WebAuthn options from the API.
+ * This is the first step in registering a new user with a passkey.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @param {string} displayName The display name for the new user.
+ * @returns {Promise<JoinResponse>} A promise that resolves with the WebAuthn public key credential creation options and a session ID.
+ * @throws {ValidationError} If the access token or display name are invalid or missing.
+ * @throws {AuthenticationError} If the access token is invalid or expired.
+ * @throws {WebAuthnError} If passkey creation options are not available or missing from the response.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function join(accessToken: string, displayName: string): Promise<JoinResponse> {
   if (!accessToken || typeof accessToken !== 'string') {
     throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);
@@ -113,6 +125,24 @@ export async function join(accessToken: string, displayName: string): Promise<Jo
   }
 }
 
+/**
+ * Completes the join (registration) process by sending the created WebAuthn credential back to the API.
+ * This is the second step in registering a new user, following `join()`.
+ *
+ * @param {PublicKeyCredential} credential The WebAuthn credential obtained from the user's authenticator.
+ * @param {string} accessToken The access token for authorization.
+ * @param {string} sessionId The session ID received from the `join()` function.
+ * @param {string} accountName The desired account name for the new user.
+ * @param {string} recipientPublicKey The public key of the recipient.
+ * @param {RecipientData} recipientData Encrypted recipient data.
+ * @param {string} [mnemonic] Optional mnemonic phrase for wallet recovery.
+ * @param {string} [password] Optional password for wallet encryption.
+ * @returns {Promise<JoinCallbackResponse>} A promise that resolves with success status, new access token, refresh token, and recipient data.
+ * @throws {ValidationError} If any required parameters are invalid or missing.
+ * @throws {AuthenticationError} If the access token is invalid or expired.
+ * @throws {WebAuthnError} If the WebAuthn attestation is invalid or passkey creation fails.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function joinCallback(
   credential: PublicKeyCredential,
   accessToken: string,

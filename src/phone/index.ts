@@ -11,6 +11,16 @@ import {
   AuthenticationError,
 } from '../utils/errors';
 
+/**
+ * Sends a One-Time Password (OTP) to the specified phone number.
+ *
+ * @param {string} countryCode The country dial code (e.g., '+1', '+44').
+ * @param {string} phone The phone number to send the OTP to.
+ * @returns {Promise<{ success: boolean }>} A promise that resolves with a success indicator.
+ * @throws {ValidationError} If the country code or phone number are invalid or missing.
+ * @throws {OTPError} If the API call fails to send the OTP.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function sendOtp(countryCode: string, phone: string): Promise<{ success: boolean }> {
   // Input validation
   if (!countryCode || typeof countryCode !== 'string') {
@@ -74,6 +84,18 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
   }
 }
 
+/**
+ * Verifies a One-Time Password (OTP) for a given phone number.
+ *
+ * @param {string} countryCode The country dial code (e.g., '+1', '+44').
+ * @param {string} phone The phone number associated with the OTP.
+ * @param {string} otpCode The OTP received by the user.
+ * @param {string} [chainID='0001'] The chain ID for the verification (defaults to '0001').
+ * @returns {Promise<APIDefaultResponse>} A promise that resolves with an access token and refresh token upon successful verification.
+ * @throws {ValidationError} If any of the input parameters are invalid or missing.
+ * @throws {OTPError} If the OTP verification fails due to invalid code, expiration, or other API errors.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function verifyOtp(
   countryCode: string,
   phone: string,
@@ -191,6 +213,13 @@ export async function verifyOtp(
   }
 }
 
+/**
+ * Retrieves a list of supported countries for phone number operations.
+ *
+ * @returns {Promise<Country[]>} A promise that resolves with an array of country objects.
+ * @throws {AuthenticationError} If the API call fails to fetch countries or returns an invalid response.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function getCountries(): Promise<Country[]> {
   try {
     const response = await api<Country[]>('/phone/countries', 'GET', null, undefined, false);

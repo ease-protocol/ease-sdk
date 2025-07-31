@@ -15,16 +15,16 @@ export type ApiResponse<T> = {
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
-export async function internalApi<T>(
+export async function internalApi<T, B = any>(
   url: string,
   method: HttpMethod,
-  body: any = null,
+  body: B = null as B,
   headers: Record<string, string> | undefined = undefined,
   fromEnclave: boolean = false,
   isAbsoluteUrl: boolean = false,
   timeout: number = 5000,
 ): Promise<ApiResponse<T>> {
-  let path: string = ''; // Initialize path here
+  
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -32,8 +32,8 @@ export async function internalApi<T>(
     const baseUrl = fromEnclave ? getUrl('EASE_RELAY') : getUrl('EASE_API');
     const fullUrl = isAbsoluteUrl ? url : `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
 
-    const urlObj = new URL(fullUrl);
-    path = urlObj.pathname; // Assign value here
+    
+    
 
     const options: RequestInit = {
       method,

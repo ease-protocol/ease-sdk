@@ -70,7 +70,7 @@ export interface PublicKeyCredentialCreationOptions {
   excludeCredentials?: PublicKeyCredentialDescriptor[];
   authenticatorSelection?: AuthenticatorSelectionCriteria;
   attestation?: AttestationConveyancePreference;
-  extensions?: Record<string, any>;
+  extensions?: Record<string, unknown>;
 }
 
 // WebAuthn Authentication Options (for login)
@@ -80,7 +80,7 @@ export interface PublicKeyCredentialRequestOptions {
   rpId?: string;
   allowCredentials?: PublicKeyCredentialDescriptor[];
   userVerification?: UserVerificationRequirement;
-  extensions?: Record<string, any>;
+  extensions?: Record<string, unknown>;
 }
 
 // WebAuthn Response Types
@@ -167,8 +167,8 @@ export type CreateKeysResponse = {
 
 export type CreateTransactionResponse = {
   coin: string;
-  transaction: any;
-  params: any;
+  transaction: unknown;
+  params: unknown;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -178,7 +178,7 @@ export type RecipientData<T = unknown> = {
 };
 
 export type SignTransactionOptionsResponse = {
-  publicKey: PublicKeyCredentialRequestOptionsJSON;
+  publicKey: PublicKeyCredentialRequestOptions;
   sessionId: string;
 };
 
@@ -200,13 +200,13 @@ export type GetAttestationResponse = {
 
 // sign transaction callback
 export type SignTransactionCallbackInput = {
-  response: any;
+  response: unknown;
   coin: string;
-  recipientData: RecipientData<{ transaction: any; params: any }>;
+  recipientData: RecipientData<{ transaction: unknown; params: unknown }>;
 };
 export type SignTransactionCallbackResponse = {
   coin: string;
-  response: any;
+  response: unknown;
 };
 
 export type GoogleOAuthURLResponse = {

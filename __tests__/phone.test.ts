@@ -1,6 +1,6 @@
 import { sendOtp, verifyOtp, getCountries } from '../src/phone';
 import { internalApi } from '../src/api';
-import { ValidationError, OTPError, handleUnknownError, AuthenticationError } from '../src/utils/errors';
+import { ValidationError, OTPError, handleUnknownError, AuthenticationError, ErrorCode } from '../src/utils/errors';
 import { logger, LogLevel } from '../src/utils/logger';
 
 jest.mock('../src/api', () => ({
@@ -177,7 +177,9 @@ describe('Phone Service', () => {
       logger.configure({ level: LogLevel.SILENT });
       mockApi.mockResolvedValueOnce({ success: false, error: 'Failed to fetch countries' });
 
-      await expect(getCountries()).rejects.toThrow(AuthenticationError);
+      const error = await getCountries().catch((e) => e);
+      expect(error).toBeInstanceOf(AuthenticationError);
+      expect(error.code).toBe(ErrorCode.AUTHENTICATION_FAILED);
     });
   });
 });

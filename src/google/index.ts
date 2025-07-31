@@ -3,6 +3,14 @@ import { logger } from '../utils/logger';
 import { AuthenticationError, ErrorCode, handleUnknownError, isEaseSDKError } from '../utils/errors';
 import { GoogleOAuthURLResponse, GoogleOAuthCallbackRequest, GoogleOAuthCallbackResponse } from '../utils/type';
 
+/**
+ * Retrieves the Google OAuth URL for initiating the authentication flow.
+ *
+ * @param {'web' | 'mobile'} platform The platform from which the OAuth flow is initiated ('web' or 'mobile').
+ * @returns {Promise<GoogleOAuthURLResponse>} A promise that resolves with the Google OAuth URL.
+ * @throws {AuthenticationError} If the API call fails or returns an invalid response.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function getGoogleOAuthURL(platform: 'web' | 'mobile'): Promise<GoogleOAuthURLResponse> {
   try {
     const response = await api<GoogleOAuthURLResponse>(`/oauth/google?platform=${platform}`, 'GET');
@@ -42,6 +50,14 @@ export async function getGoogleOAuthURL(platform: 'web' | 'mobile'): Promise<Goo
   }
 }
 
+/**
+ * Verifies the Google OAuth callback data to obtain access and refresh tokens.
+ *
+ * @param {GoogleOAuthCallbackRequest} callbackData The data received from the Google OAuth callback.
+ * @returns {Promise<GoogleOAuthCallbackResponse>} A promise that resolves with the access token and refresh token.
+ * @throws {AuthenticationError} If the API call fails or returns an invalid response.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function verifyGoogleOAuthCallback(
   callbackData: GoogleOAuthCallbackRequest,
 ): Promise<GoogleOAuthCallbackResponse> {
