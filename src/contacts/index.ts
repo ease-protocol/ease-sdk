@@ -3,6 +3,15 @@ import { logger } from '../utils/logger';
 import { handleUnknownError, isEaseSDKError, ValidationError } from '../utils/errors';
 import { Contact, SearchUser } from '../utils/type';
 
+/**
+ * Retrieves all contacts for the authenticated user.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @returns {Promise<Contact[]>} A promise that resolves with an array of contact objects.
+ * @throws {ValidationError} If the access token is missing or invalid.
+ * @throws {Error} If the API call fails or returns an unsuccessful response.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function getContacts(accessToken: string): Promise<Contact[]> {
   if (!accessToken || typeof accessToken !== 'string') {
     throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);
@@ -30,6 +39,16 @@ export async function getContacts(accessToken: string): Promise<Contact[]> {
   }
 }
 
+/**
+ * Adds a new contact for the authenticated user.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @param {string} userId The ID of the user to add as a contact.
+ * @returns {Promise<{ success: boolean }>} A promise that resolves with a success indicator.
+ * @throws {ValidationError} If the access token or user ID are missing or invalid.
+ * @throws {Error} If the API call fails or returns an unsuccessful response.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function addContact(accessToken: string, userId: string): Promise<{ success: boolean }> {
   if (!accessToken || typeof accessToken !== 'string') {
     throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);
@@ -65,6 +84,16 @@ export async function addContact(accessToken: string, userId: string): Promise<{
   }
 }
 
+/**
+ * Deletes a contact for the authenticated user.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @param {string} id The ID of the contact to delete.
+ * @returns {Promise<{ success: boolean }>} A promise that resolves with a success indicator.
+ * @throws {ValidationError} If the access token or contact ID are missing or invalid.
+ * @throws {Error} If the API call fails or returns an unsuccessful response.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function deleteContact(accessToken: string, id: string): Promise<{ success: boolean }> {
   if (!accessToken || typeof accessToken !== 'string') {
     throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);
@@ -95,6 +124,16 @@ export async function deleteContact(accessToken: string, id: string): Promise<{ 
   }
 }
 
+/**
+ * Searches for users based on a query string.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @param {string} query The search query string.
+ * @returns {Promise<SearchUser[]>} A promise that resolves with an array of matching user objects.
+ * @throws {ValidationError} If the access token or query are missing or invalid.
+ * @throws {Error} If the API call fails or returns an unsuccessful response.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function searchContacts(accessToken: string, query: string): Promise<SearchUser[]> {
   if (!accessToken || typeof accessToken !== 'string') {
     throw new ValidationError('Access token is required and must be a string', 'accessToken', accessToken);

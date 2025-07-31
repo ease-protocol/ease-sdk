@@ -10,6 +10,15 @@ import {
   isEaseSDKError,
 } from '../utils/errors';
 
+/**
+ * Initiates the login process by fetching WebAuthn options from the API.
+ * This function is the first step in authenticating a user with a passkey.
+ *
+ * @returns {Promise<LoginResp>} A promise that resolves with the session ID and WebAuthn public key credential request options.
+ * @throws {AuthenticationError} If the API call fails, or if the response is missing crucial data like session ID or public key options.
+ * @throws {WebAuthnError} If WebAuthn options are not supported or missing from the response.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function login(): Promise<LoginResp> {
   try {
     const response = await api<LoginResp>('/login/options', 'POST', null, undefined, false);
@@ -65,6 +74,18 @@ export async function login(): Promise<LoginResp> {
   }
 }
 
+/**
+ * Completes the login process by sending the WebAuthn credential back to the API.
+ * This function is the second step in authenticating a user with a passkey, following `login()`.
+ *
+ * @param {PublicKeyCredential} credential The WebAuthn credential obtained from the user's authenticator.
+ * @param {string} sessionId The session ID received from the `login()` function.
+ * @returns {Promise<APIDefaultResponse>} A promise that resolves with an access token and refresh token upon successful authentication.
+ * @throws {ValidationError} If the credential or session ID are invalid or missing.
+ * @throws {AuthenticationError} If authentication fails due to invalid credentials, expired session, or missing tokens in the response.
+ * @throws {WebAuthnError} If the WebAuthn assertion is invalid.
+ * @throws {EaseSDKError} For any unexpected errors during the operation.
+ */
 export async function loginCallback(credential: PublicKeyCredential, sessionId: string): Promise<APIDefaultResponse> {
   // Input validation
   if (!credential) {

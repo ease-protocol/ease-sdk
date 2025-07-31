@@ -12,6 +12,11 @@ import {
 import { logger } from '../utils/logger';
 import { EaseSDKError, ErrorCode, handleUnknownError, ValidationError } from '../utils/errors';
 
+/**
+ * Validates the provided access token.
+ * @param {string} token The access token to validate.
+ * @throws {ValidationError} If the access token is invalid or missing.
+ */
 const validateAccessToken = (token: string) => {
   if (!token || typeof token !== 'string') {
     throw new ValidationError(ErrorCode.INVALID_INPUT, 'Access token must be a non-empty string.');
@@ -19,6 +24,14 @@ const validateAccessToken = (token: string) => {
 };
 
 // get addresses
+/**
+ * Retrieves a list of addresses associated with the authenticated user.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @returns {Promise<Address[]>} A promise that resolves with an array of address objects.
+ * @throws {ValidationError} If the access token is invalid or missing.
+ * @throws {EaseSDKError} If the API call fails or returns an invalid response.
+ */
 export async function getAddresses(accessToken: string): Promise<Address[]> {
   validateAccessToken(accessToken);
   try {
@@ -43,6 +56,15 @@ export async function getAddresses(accessToken: string): Promise<Address[]> {
   }
 }
 
+/**
+ * Creates new keys for the authenticated user.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @param {CreateKeysInput} input The input data for creating keys, including account name, recipient public key, and recipient data.
+ * @returns {Promise<CreateKeysResponse>} A promise that resolves with the response containing recipient data.
+ * @throws {ValidationError} If the access token or input are invalid or missing.
+ * @throws {EaseSDKError} If the API call fails or returns an invalid response.
+ */
 export async function createKeys(accessToken: string, input: CreateKeysInput): Promise<CreateKeysResponse> {
   validateAccessToken(accessToken);
   if (!input || typeof input !== 'object') {
@@ -66,6 +88,15 @@ export async function createKeys(accessToken: string, input: CreateKeysInput): P
   }
 }
 
+/**
+ * Creates a new transaction intent.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @param {TransactionIntent} intent The transaction intent details, including from, to, coin, amount, and optional memo.
+ * @returns {Promise<CreateTransactionResponse>} A promise that resolves with the created transaction response.
+ * @throws {ValidationError} If the access token or intent are invalid or missing.
+ * @throws {EaseSDKError} If the API call fails or returns an invalid response.
+ */
 export async function createTransaction(
   accessToken: string,
   intent: TransactionIntent,
@@ -92,6 +123,14 @@ export async function createTransaction(
   }
 }
 
+/**
+ * Retrieves options required to sign a transaction.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @returns {Promise<SignTransactionOptionsResponse>} A promise that resolves with the sign transaction options, including a session ID.
+ * @throws {ValidationError} If the access token is invalid or missing.
+ * @throws {EaseSDKError} If the API call fails or returns an invalid response.
+ */
 export async function signTransactionOptions(accessToken: string): Promise<SignTransactionOptionsResponse> {
   validateAccessToken(accessToken);
   try {
@@ -121,6 +160,16 @@ export async function signTransactionOptions(accessToken: string): Promise<SignT
   }
 }
 
+/**
+ * Completes the transaction signing process by sending the signed transaction data back to the API.
+ *
+ * @param {string} accessToken The access token for authorization.
+ * @param {string} sessionId The session ID obtained from `signTransactionOptions`.
+ * @param {SignTransactionCallbackInput} input The input data for the signed transaction callback.
+ * @returns {Promise<SignTransactionCallbackResponse>} A promise that resolves with the response from the signed transaction callback.
+ * @throws {ValidationError} If the access token, session ID, or input are invalid or missing.
+ * @throws {EaseSDKError} If the API call fails or returns an invalid response.
+ */
 export async function signTransactionCallback(
   accessToken: string,
   sessionId: string,
