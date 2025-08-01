@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.1.33",
+  "version": "1.1.40",
   "description": "ease sdk",
   "repository": {
     "type": "git",
@@ -81,6 +81,11 @@
       "types": "./dist/contacts/index.d.ts",
       "import": "./dist/contacts/index.mjs",
       "require": "./dist/contacts/index.js"
+    },
+    "./websocket": {
+      "types": "./dist/websocket/index.d.ts",
+      "import": "./dist/websocket/index.mjs",
+      "require": "./dist/websocket/index.js"
     }
   },
   "keywords": [],

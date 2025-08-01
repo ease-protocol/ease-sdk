@@ -8,6 +8,7 @@ export * from './transaction';
 export * from './refresh';
 export * from './google';
 export * from './contacts';
+export * from './websocket';
 export { setEnvironment } from './utils/environment';
 
 // Re-export logger, errors, and types for convenience
