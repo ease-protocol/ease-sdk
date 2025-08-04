@@ -14,7 +14,7 @@ export default defineConfig({
     'src/utils/crypto.ts',
     'src/refresh/index.ts',
     'src/google/index.ts',
-    'src/contacts/index.ts'
+    'src/contacts/index.ts',
   ], // ← point to your file(s)
   format: ['esm', 'cjs'],
   outDir: 'dist',

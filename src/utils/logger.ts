@@ -1,3 +1,6 @@
+import { getEnvironment } from './environment';
+import { getUrl } from './urls';
+
 const { version } = require('../../package.json');
 export enum LogLevel {
   DEBUG = 0,
@@ -47,6 +50,77 @@ class Logger {
   error(message: string, ...args: any[]): void {
     if (this.config.level <= LogLevel.ERROR) {
       console.error(`${this.config.prefix} [ERROR]`, message, ...args);
+      this.logEvent(message, 'error', { args });
+    }
+  }
+  async logEvent(
+    message: string,
+    level: 'info' | 'warn' | 'error' | 'debug' = 'info',
+    context: Record<string, any> = {},
+    deviceId?: string,
+  ) {
+    try {
+      const url = getUrl('API_LOGGING');
+      const environment = getEnvironment();
+      const timestamp = new Date().toISOString();
+
+      const body = {
+        message,
+        level,
+        context,
+        environment,
+        deviceId,
+        timestamp,
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        this.error('Failed to log event', { status: response.status });
+      }
+    } catch (error) {
+      this.error('Error in logEvent', error);
+    }
+  }
+
+  async logEvents(
+    events: {
+      message: string;
+      level?: 'info' | 'warn' | 'error' | 'debug';
+      context?: Record<string, any>;
+      deviceId?: string;
+    }[],
+  ) {
+    try {
+      const url = getUrl('API_LOGGING');
+      const environment = getEnvironment();
+      const timestamp = new Date().toISOString();
+
+      const body = events.map((event) => ({
+        ...event,
+        environment,
+        timestamp,
+      }));
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        this.error('Failed to log events', { status: response.status });
+      }
+    } catch (error) {
+      this.error('Error in logEvents', error);
     }
   }
 }
