@@ -36,17 +36,17 @@ This repository contains the source code for the EASE SDK, a comprehensive TypeS
 
 The EASE SDK provides a wide range of features to interact with the EASE Protocol, including:
 
--   **User Authentication**: Secure login and logout functionalities.
--   **User Management**: Join and manage user accounts.
--   **Wallet Operations**: Manage cryptocurrency wallets, including balance checks and transaction history.
--   **Transaction Management**: Create and process various types of transactions.
--   **Phone Integration**: OTP verification and other phone-related functionalities.
--   **Contact Management**: Add, delete, and search for contacts within the EASE ecosystem.
--   **Google Integration**: Seamless integration with Google services.
--   **Secure Enclave Interaction**: Functionality for secure operations.
--   **Token Refresh**: Automated handling of access token refreshing.
--   **Error Handling**: Comprehensive error handling with specific error codes and messages.
--   **Logging**: Configurable logging for development and debugging.
+- **User Authentication**: Secure login and logout functionalities.
+- **User Management**: Join and manage user accounts.
+- **Wallet Operations**: Manage cryptocurrency wallets, including balance checks and transaction history.
+- **Transaction Management**: Create and process various types of transactions.
+- **Phone Integration**: OTP verification and other phone-related functionalities.
+- **Contact Management**: Add, delete, and search for contacts within the EASE ecosystem.
+- **Google Integration**: Seamless integration with Google services.
+- **Secure Enclave Interaction**: Functionality for secure operations.
+- **Token Refresh**: Automated handling of access token refreshing.
+- **Error Handling**: Comprehensive error handling with specific error codes and messages.
+- **Logging**: Configurable logging for development and debugging.
 
 ## Development
 
@@ -54,8 +54,8 @@ The EASE SDK provides a wide range of features to interact with the EASE Protoco
 
 To set up the development environment for the EASE SDK, you need the following:
 
--   **Node.js**: Version 18 or higher.
--   **npm**: Node Package Manager, typically installed with Node.js.
+- **Node.js**: Version 18 or higher.
+- **npm**: Node Package Manager, typically installed with Node.js.
 
 ### Installation
 
@@ -121,27 +121,27 @@ The generated documentation will be available in the `docs` directory.
 
 The project is organized as follows:
 
--   `src`: Contains the core source code of the SDK, written in TypeScript.
-    -   `api`: Handles communication with internal and external APIs.
-    -   `enclave`: Functionality related to secure enclaves.
-    -   `join`: Logic for user registration and joining the platform.
-    -   `login`: Handles user authentication and login processes.
-    -   `logout`: Manages user logout procedures.
-    -   `phone`: Functionality for phone-related operations (e.g., OTP).
-    -   `refresh`: Handles token refresh mechanisms.
-    -   `transaction`: Manages transaction creation and processing.
-    -   `contacts`: Contains the contacts functionality.
-    -   `google`: Integrates with Google services.
-    -   `utils`: A collection of utility functions and helpers.
-    -   `wallet`: Manages wallet-related operations (e.g., balance, history).
--   `__tests__`: Contains all unit and integration tests for the SDK.
--   `dist`: Output directory for compiled JavaScript and type definition files.
--   `node_modules`: Directory containing installed npm dependencies.
--   `package.json`: Project metadata, scripts, and dependency declarations.
--   `tsconfig.json`: TypeScript compiler configuration.
--   `jest.config.mjs`: Jest test runner configuration.
--   `eslint.config.js`: ESLint linter configuration.
--   `tsup.config.ts`: tsup bundler configuration.
+- `src`: Contains the core source code of the SDK, written in TypeScript.
+  - `api`: Handles communication with internal and external APIs.
+  - `enclave`: Functionality related to secure enclaves.
+  - `join`: Logic for user registration and joining the platform.
+  - `login`: Handles user authentication and login processes.
+  - `logout`: Manages user logout procedures.
+  - `phone`: Functionality for phone-related operations (e.g., OTP).
+  - `refresh`: Handles token refresh mechanisms.
+  - `transaction`: Manages transaction creation and processing.
+  - `contacts`: Contains the contacts functionality.
+  - `google`: Integrates with Google services.
+  - `utils`: A collection of utility functions and helpers.
+  - `wallet`: Manages wallet-related operations (e.g., balance, history).
+- `__tests__`: Contains all unit and integration tests for the SDK.
+- `dist`: Output directory for compiled JavaScript and type definition files.
+- `node_modules`: Directory containing installed npm dependencies.
+- `package.json`: Project metadata, scripts, and dependency declarations.
+- `tsconfig.json`: TypeScript compiler configuration.
+- `jest.config.mjs`: Jest test runner configuration.
+- `eslint.config.js`: ESLint linter configuration.
+- `tsup.config.ts`: tsup bundler configuration.
 
 ## Usage
 
@@ -248,8 +248,8 @@ npm run format
 
 If you encounter any issues, have questions, or need assistance, please refer to the following resources:
 
--   **GitHub Issues**: For bug reports and feature requests, please open an issue on our [GitHub repository](https://github.com/ease-protocol/ease-sdk/issues).
--   **Documentation**: Refer to the [API Documentation](#api-documentation) for detailed information on SDK functionalities.
+- **GitHub Issues**: For bug reports and feature requests, please open an issue on our [GitHub repository](https://github.com/ease-protocol/ease-sdk/issues).
+- **Documentation**: Refer to the [API Documentation](#api-documentation) for detailed information on SDK functionalities.
 
 ## License
 

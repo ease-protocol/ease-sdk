@@ -52,9 +52,14 @@ describe('Contacts Module', () => {
       const result = await addContact('access-token', 'user-id');
 
       expect(result).toEqual({ success: true });
-      expect(mockApi).toHaveBeenCalledWith('/contacts', 'POST', { userId: 'user-id' }, {
-        Authorization: 'Bearer access-token',
-      });
+      expect(mockApi).toHaveBeenCalledWith(
+        '/contacts',
+        'POST',
+        { userId: 'user-id' },
+        {
+          Authorization: 'Bearer access-token',
+        },
+      );
     });
 
     it('should handle API error responses', async () => {

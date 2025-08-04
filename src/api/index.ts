@@ -24,16 +24,12 @@ export async function internalApi<T, B = any>(
   isAbsoluteUrl: boolean = false,
   timeout: number = 5000,
 ): Promise<ApiResponse<T>> {
-  
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
     const baseUrl = fromEnclave ? getUrl('EASE_RELAY') : getUrl('EASE_API');
     const fullUrl = isAbsoluteUrl ? url : `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
-
-    
-    
 
     const options: RequestInit = {
       method,
