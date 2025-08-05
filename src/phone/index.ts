@@ -1,5 +1,5 @@
 import { internalApi as api } from '../api';
-import { APIDefaultResponse, SendOtpResp, Country } from '../utils/type';
+import { APIDefaultResponse, Country } from '../utils/type';
 import { logger } from '../utils/logger';
 
 import {
@@ -38,7 +38,7 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
   }
 
   try {
-    const response = await api<SendOtpResp>(
+    const response = await api(
       `/phone/send-otp`,
       'POST',
       {
@@ -49,7 +49,7 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
       false,
     );
 
-    if (!response.success) {
+    if (response.error) {
       logger.error('OTP send failed:', {
         countryCode,
         phone: phone.substring(0, 3) + '***', // Mask phone for privacy
@@ -67,7 +67,7 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
       });
     }
 
-    return { success: response.data!.success };
+    return { success: true };
   } catch (error) {
     if (isEaseSDKError(error)) {
       throw error;
@@ -191,7 +191,6 @@ export async function verifyOtp(
     const { accessToken, refreshToken } = response.data;
 
     return {
-      success: true,
       accessToken,
       refreshToken,
     };

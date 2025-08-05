@@ -2,9 +2,6 @@ export type APIDefaultResponse = {
   accessToken: string;
   refreshToken: string;
 };
-export type SendOtpResp = {
-  success: boolean;
-};
 
 export type Country = {
   code: string;

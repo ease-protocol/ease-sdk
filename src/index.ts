@@ -32,7 +32,6 @@ export type { ErrorDetails } from './utils/errors';
 
 export type {
   APIDefaultResponse,
-  SendOtpResp,
   Country,
   AuthenticatorTransport,
   COSEAlgorithmIdentifier,

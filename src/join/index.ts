@@ -271,7 +271,6 @@ export async function joinCallback(
     });
 
     return {
-      success: true,
       accessToken: newAccessToken,
       refreshToken,
       recipientData: newRecipientData,
