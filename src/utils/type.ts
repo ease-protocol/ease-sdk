@@ -1,5 +1,4 @@
 export type APIDefaultResponse = {
-  success: boolean;
   accessToken: string;
   refreshToken: string;
 };
@@ -124,7 +123,6 @@ export type JoinResponse = {
 };
 
 export type JoinCallbackResponse = {
-  success: boolean;
   accessToken: string;
   refreshToken: string;
   recipientData: RecipientData;
@@ -210,7 +208,6 @@ export type SignTransactionCallbackResponse = {
 };
 
 export type GoogleOAuthURLResponse = {
-  success: boolean;
   authURL: string;
 };
 
@@ -221,7 +218,6 @@ export type GoogleOAuthCallbackRequest = {
 };
 
 export type GoogleOAuthCallbackResponse = {
-  success: boolean;
   accessToken: string;
   refreshToken: string;
 };

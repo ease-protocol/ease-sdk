@@ -15,6 +15,8 @@ export default defineConfig({
     'src/refresh/index.ts',
     'src/google/index.ts',
     'src/contacts/index.ts',
+    'src/websocket/index.ts',
+    'src/analytics/index.ts',
   ], // ← point to your file(s)
   format: ['esm', 'cjs'],
   outDir: 'dist',
