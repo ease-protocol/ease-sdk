@@ -67,7 +67,7 @@ export async function internalApi<T, B = any>(
 
   try {
     const baseUrl = fromEnclave ? getUrl('EASE_RELAY') : getUrl('EASE_API');
-    const fullUrl = isAbsoluteUrl ? url : `${baseUrl}${url.startsWith('/') ? url.substring(1) : url}`;
+    const fullUrl = isAbsoluteUrl ? url : `${baseUrl}${url}`;
     const origin: 'internal' | 'external' = isAbsoluteUrl && !fullUrl.includes(baseUrl) ? 'external' : 'internal';
     const service = serviceFrom(fullUrl, fromEnclave, isAbsoluteUrl);
     const path = toPath(fullUrl);
