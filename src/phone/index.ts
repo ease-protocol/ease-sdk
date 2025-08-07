@@ -49,8 +49,10 @@ export async function sendOtp(countryCode: string, phone: string): Promise<{ suc
       false,
     );
 
-    if (response.error) {
+    if (!response.success) {
       logger.error('OTP send failed:', {
+        success: response.success,
+        data: response.data,
         countryCode,
         phone: phone.substring(0, 3) + '***', // Mask phone for privacy
         error: response.error,

@@ -16,7 +16,7 @@ export interface LoggerConfig {
 class Logger {
   private config: LoggerConfig = {
     level: LogLevel.DEBUG,
-    prefix: `[ease-sdk@${version}]`,
+    prefix: `[ease-sdk@${version}] [${new Date().toISOString()}]`,
   };
 
   configure(config: Partial<LoggerConfig>): void {

@@ -231,3 +231,43 @@ export type SearchUser = {
   id: string;
   accountName: string;
 };
+
+export type TransportRequestCtx = {
+  requestId: string;
+  method: string;
+  url: string;
+  path?: string; // helpful for endpoint mapping
+  startTs: number; // Date.now()
+  headers?: Record<string, string>;
+  bodySize?: number;
+  origin: 'internal' | 'external';
+  service?: string; // e.g., "EASE_API", "EASE_RELAY", "MEMPOOL_SPACE", "ETHERSCAN_PROXY"
+};
+
+export type TransportResponseCtx = {
+  requestId: string;
+  url: string;
+  path?: string;
+  status: number;
+  durationMs: number;
+  headers?: Record<string, string>;
+  origin: 'internal' | 'external';
+  service?: string;
+};
+
+export type TransportErrorCtx = {
+  requestId: string;
+  url: string;
+  path?: string;
+  durationMs: number;
+  error: Error;
+  status?: number;
+  origin: 'internal' | 'external';
+  service?: string;
+};
+
+export type TransportObserver = {
+  onRequest?(ctx: TransportRequestCtx): void;
+  onResponse?(ctx: TransportResponseCtx): void;
+  onError?(ctx: TransportErrorCtx): void;
+};
