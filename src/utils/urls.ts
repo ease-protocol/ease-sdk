@@ -12,7 +12,7 @@ type ServiceUrls = {
 
 const urls: Record<Environment, ServiceUrls> = {
   develop: {
-    EASE_API: 'https://staging.api.ease.tech/',
+    EASE_API: 'https://staging.api.ease.tech',
     EASE_RELAY: 'https://relay.ease.tech/',
     MEMPOOL_SPACE: 'https://mempool.space/testnet',
     ETHERSCAN_PROXY: 'https://etherscan-proxy-am1u.vercel.app',
@@ -20,7 +20,7 @@ const urls: Record<Environment, ServiceUrls> = {
     API_LOGGING: 'https://app-logging.vercel.app/api/logs',
   },
   staging: {
-    EASE_API: 'https://staging.api.ease.tech/',
+    EASE_API: 'https://staging.api.ease.tech',
     EASE_RELAY: 'https://relay.ease.tech',
     MEMPOOL_SPACE: 'https://mempool.space/testnet',
     ETHERSCAN_PROXY: 'https://etherscan-proxy-am1u.vercel.app',
@@ -28,7 +28,7 @@ const urls: Record<Environment, ServiceUrls> = {
     API_LOGGING: 'https://app-logging.vercel.app/api/logs',
   },
   production: {
-    EASE_API: 'https://api.ease.tech/',
+    EASE_API: 'https://api.ease.tech',
     EASE_RELAY: 'https://relay.ease.tech',
     MEMPOOL_SPACE: 'https://mempool.space',
     ETHERSCAN_PROXY: 'https://etherscan-proxy-am1u.vercel.app',

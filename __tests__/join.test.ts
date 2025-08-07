@@ -180,7 +180,6 @@ describe('Join Module', () => {
         validRecipientData,
       );
 
-      expect(result.success).toBe(true);
       expect(result.accessToken).toBe('new-access-token');
       expect(result.refreshToken).toBe('new-refresh-token');
       expect(result.recipientData).toEqual(validRecipientData);

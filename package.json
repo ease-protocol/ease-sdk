@@ -1,13 +1,15 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.1.33",
-  "description": "ease sdk",
+  "version": "1.2.13",
+  "description": "ease sdk for web and react native",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ease-protocol/ease-sdk.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "publishConfig": {
     "@ease-protocol:registry": "https://npm.pkg.github.com"
@@ -19,7 +21,8 @@
     "build:watch": "tsup --watch",
     "test": "jest",
     "docs": "typedoc --plugin typedoc-plugin-markdown --out docs src",
-    "compile": "tsc"
+    "compile": "tsc",
+    "prepack": "node scripts/generate-version.js && tsup --clean"
   },
   "exports": {
     ".": {
@@ -81,6 +84,21 @@
       "types": "./dist/contacts/index.d.ts",
       "import": "./dist/contacts/index.mjs",
       "require": "./dist/contacts/index.js"
+    },
+    "./websocket": {
+      "types": "./dist/websocket/index.d.ts",
+      "import": "./dist/websocket/index.mjs",
+      "require": "./dist/websocket/index.js"
+    },
+    "./analytics": {
+      "types": "./dist/analytics//index.d.ts",
+      "import": "./dist/analytics/index.mjs",
+      "require": "./dist/analytics/index.js"
+    },
+    "./telemetry": {
+      "types": "./dist/core/telemetry.d.ts",
+      "import": "./dist/core/telemetry.mjs",
+      "require": "./dist/core/telemetry.js"
     }
   },
   "keywords": [],

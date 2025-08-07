@@ -159,7 +159,6 @@ export async function loginCallback(credential: PublicKeyCredential, sessionId: 
     const { accessToken, refreshToken } = response.data;
 
     return {
-      success: true,
       accessToken,
       refreshToken,
     };

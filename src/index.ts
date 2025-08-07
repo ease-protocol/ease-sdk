@@ -8,6 +8,8 @@ export * from './transaction';
 export * from './refresh';
 export * from './google';
 export * from './contacts';
+export * from './websocket';
+export * from './analytics';
 export { setEnvironment } from './utils/environment';
 
 // Re-export logger, errors, and types for convenience
@@ -30,7 +32,6 @@ export type { ErrorDetails } from './utils/errors';
 
 export type {
   APIDefaultResponse,
-  SendOtpResp,
   Country,
   AuthenticatorTransport,
   COSEAlgorithmIdentifier,

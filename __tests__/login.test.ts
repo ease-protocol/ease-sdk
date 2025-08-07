@@ -125,7 +125,6 @@ describe('Login Module', () => {
 
       const result = await loginCallback(mockCredential, validSessionId);
 
-      expect(result.success).toBe(true);
       expect(result.accessToken).toBe('access-token');
       expect(result.refreshToken).toBe('refresh-token');
       expect(mockApi).toHaveBeenCalledWith(

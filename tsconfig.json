@@ -16,6 +16,6 @@
     "isolatedModules": true // Good practice with transpilers like tsup/esbuild/babel
     // Add other options like "baseUrl", "paths" if you use them for internal project structure
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "scripts"],
   "exclude": ["node_modules", "dist"] // "dist" should be excluded if tsc isn't meant to read from it
 }

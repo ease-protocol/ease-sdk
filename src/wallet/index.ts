@@ -82,11 +82,11 @@ export function ammountToSmallestUnit(coin: string, amount: number): number {
  * Generates an explorer URL for a given transaction response based on the coin type.
  *
  * @param {string} coin The ticker symbol of the cryptocurrency (e.g., 'BTC', 'ETH').
- * @param {any} response The transaction response object or ID from which to construct the URL.
+ * @param {string} trxId The transaction response object or ID from which to construct the URL.
  * @returns {string} The URL to the transaction on the respective blockchain explorer, or an empty string if not supported.
  * @throws {EaseSDKError} If the input coin is not a non-empty string.
  */
-export function explorerUrlFromResponse(coin: string, response: any): string {
+export function explorerUrlFromResponse(coin: string, trxId: string): string {
   if (typeof coin !== 'string' || coin.length === 0) {
     throw new EaseSDKError({ code: ErrorCode.INVALID_INPUT, message: 'Coin must be a non-empty string.' });
   }
@@ -94,9 +94,9 @@ export function explorerUrlFromResponse(coin: string, response: any): string {
     case 'EASE':
       return '';
     case 'BTC':
-      return `${getUrl('MEMPOOL_SPACE')}/tx/${response}`;
+      return `${getUrl('MEMPOOL_SPACE')}/tx/${trxId}`;
     case 'ETH':
-      return `${getUrl('SEPOLIA_ETHERSCAN')}/tx/${response}`;
+      return `${getUrl('SEPOLIA_ETHERSCAN')}/tx/${trxId}`;
     default:
       return '';
   }
