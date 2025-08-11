@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.2.13",
+  "version": "1.2.19",
   "description": "ease sdk for web and react native",
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
     "test": "jest",
     "docs": "typedoc --plugin typedoc-plugin-markdown --out docs src",
     "compile": "tsc",
-    "prepack": "node scripts/generate-version.js && tsup --clean"
+    "prepack": "node scripts/generate-version.js && npm run compile && npm run format && tsup --clean"
   },
   "exports": {
     ".": {

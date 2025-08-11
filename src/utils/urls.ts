@@ -13,7 +13,7 @@ type ServiceUrls = {
 const urls: Record<Environment, ServiceUrls> = {
   develop: {
     EASE_API: 'https://staging.api.ease.tech',
-    EASE_RELAY: 'https://relay.ease.tech/',
+    EASE_RELAY: 'https://relay.ease.tech',
     MEMPOOL_SPACE: 'https://mempool.space/testnet',
     ETHERSCAN_PROXY: 'https://etherscan-proxy-am1u.vercel.app',
     SEPOLIA_ETHERSCAN: 'https://sepolia.etherscan.io',
