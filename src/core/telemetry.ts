@@ -1,11 +1,14 @@
+import { logger } from '../utils/logger';
 import { TransportErrorCtx, TransportObserver, TransportRequestCtx, TransportResponseCtx } from '../utils/type';
 
 // core/telemetry.ts
 const observers: TransportObserver[] = [];
 
 export function addTransportObserver(o: TransportObserver) {
+  logger.debug('Adding transport observer');
   observers.push(o);
   return () => {
+    logger.debug('Removing transport observer');
     const i = observers.indexOf(o);
     if (i >= 0) observers.splice(i, 1);
   };

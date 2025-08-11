@@ -1,6 +1,7 @@
 import { getEnvironment } from '../utils/environment';
 import { getUrl } from '../utils/urls';
 import { logger } from '../utils/logger';
+import { getAppName } from '../config';
 
 export async function logEvent(
   message: string,
@@ -12,11 +13,12 @@ export async function logEvent(
     const url = getUrl('API_LOGGING');
     const environment = getEnvironment();
     const timestamp = new Date().toISOString();
+    const appName = getAppName();
 
     const body = {
       message,
       level,
-      context,
+      context: { ...context, appName },
       environment,
       deviceId,
       timestamp,

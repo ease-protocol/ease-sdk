@@ -2,6 +2,7 @@ import { logEvent, logEvents } from '../src/analytics';
 import { getEnvironment } from '../src/utils/environment';
 import { getUrl } from '../src/utils/urls';
 import { logger } from '../src/utils/logger';
+import { SDK_VERSION } from '../src/version';
 
 // Mock dependencies
 jest.mock('../src/utils/environment', () => ({
@@ -73,7 +74,7 @@ describe('Analytics', () => {
       expect(sentBody).toEqual({
         message: eventData.message,
         level: eventData.level,
-        context: eventData.context,
+        context: { ...eventData.context, appName: `EASE_SDK_DEFAULT_APP_V${SDK_VERSION}` },
         deviceId: eventData.deviceId,
         environment: mockEnvironment,
         timestamp: mockTimestamp,
@@ -92,7 +93,7 @@ describe('Analytics', () => {
         body: JSON.stringify({
           message,
           level: 'info',
-          context: {},
+          context: { appName: `EASE_SDK_DEFAULT_APP_V${SDK_VERSION}` },
           environment: mockEnvironment,
           deviceId: undefined,
           timestamp: mockTimestamp,

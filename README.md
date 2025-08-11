@@ -47,6 +47,8 @@ The EASE SDK provides a wide range of features to interact with the EASE Protoco
 - **Token Refresh**: Automated handling of access token refreshing.
 - **Error Handling**: Comprehensive error handling with specific error codes and messages.
 - **Logging**: Configurable logging for development and debugging.
+- **Analytics**: For tracking user behavior and SDK usage.
+- **WebSocket**: For real-time communication.
 
 ## Development
 
