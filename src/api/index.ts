@@ -157,7 +157,7 @@ export async function internalApi<T, B = any>(
     };
     _notify.request(requestCtx);
     logger.debug('Request', requestCtx);
-    emitLogEvent('request', requestCtx); // fire-and-forget
+    emitLogEvent('request', { ...requestCtx, body }); // fire-and-forget
 
     // Fetch
     const response = await fetch(fullUrl, init);
@@ -211,7 +211,7 @@ export async function internalApi<T, B = any>(
         service,
       });
       logger.error('Response error', errorCtx);
-      emitLogEvent('error', errorCtx);
+      emitLogEvent('error', { ...errorCtx, body });
 
       return {
         success: false,
@@ -254,7 +254,7 @@ export async function internalApi<T, B = any>(
         service,
       });
       logger.error('JSON parse error', errorCtx);
-      emitLogEvent('error', errorCtx);
+      emitLogEvent('error', { ...errorCtx, body });
 
       throw netErr;
     }
@@ -281,7 +281,7 @@ export async function internalApi<T, B = any>(
       service,
     });
     logger.info('Response', responseCtx);
-    emitLogEvent('response', responseCtx);
+    emitLogEvent('response', { ...responseCtx, body });
 
     return { success: true, data, headers: response.headers };
   } catch (error: any) {
@@ -311,7 +311,7 @@ export async function internalApi<T, B = any>(
         service,
       });
       logger.error('Timeout error', errorCtx);
-      emitLogEvent('error', errorCtx);
+      emitLogEvent('error', { ...errorCtx, body });
 
       return {
         success: false,
