@@ -1,6 +1,6 @@
 {
   "name": "@ease-protocol/ease-sdk",
-  "version": "1.2.19",
+  "version": "1.2.27",
   "description": "ease sdk for web and react native",
   "repository": {
     "type": "git",
@@ -99,6 +99,12 @@
       "types": "./dist/core/telemetry.d.ts",
       "import": "./dist/core/telemetry.mjs",
       "require": "./dist/core/telemetry.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "react-native": "./dist/config.mjs",
+      "import": "./dist/config.mjs",
+      "require": "./dist/config.js"
     }
   },
   "keywords": [],
