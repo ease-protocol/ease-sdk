@@ -4,7 +4,7 @@ import { logger, LogLevel } from './utils/logger';
 import { Environment } from './utils/type';
 
 const config = {
-  appName: `EASE_SDK_DEFAULT_APP_V${SDK_VERSION}`,
+  appName: `EASE_SDK_APP_V_${SDK_VERSION}`,
 };
 
 export interface SDKConfig {
