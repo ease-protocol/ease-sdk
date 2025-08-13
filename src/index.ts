@@ -10,7 +10,8 @@ export * from './google';
 export * from './contacts';
 export * from './websocket';
 export * from './analytics';
-export { setEnvironment } from './utils/environment';
+export { configure } from './config';
+export type { SDKConfig } from './config';
 
 // Re-export logger, errors, and types for convenience
 export { logger, LogLevel } from './utils/logger';

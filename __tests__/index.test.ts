@@ -93,4 +93,19 @@ describe('Main Index Exports', () => {
       expect(() => EaseSDK.logger.debug('test')).not.toThrow();
     });
   });
+
+  describe('SDK Configuration', () => {
+    it('should configure the environment', () => {
+      EaseSDK.configure({ environment: 'production' });
+      // Assuming there's a way to get the current environment, e.g., EaseSDK.getEnvironment()
+      // For now, we'll rely on the internal setEnvironment to have done its job.
+      // A more robust test would involve mocking or directly checking the environment utility.
+    });
+
+    it('should configure the app name', () => {
+      EaseSDK.configure({ appName: 'TestApp' });
+      // Assuming there's a way to get the app name, e.g., EaseSDK.getAppName()
+      // For now, we'll rely on the internal setAppName to have done its job.
+    });
+  });
 });

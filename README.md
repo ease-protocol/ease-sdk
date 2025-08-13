@@ -158,10 +158,13 @@ npm install @ease-protocol/ease-sdk
 ### Basic Example
 
 ```typescript
-import { login, loginCallback, setEnvironment } from '@ease-protocol/ease-sdk';
+import { login, loginCallback, configure } from '@ease-protocol/ease-sdk';
 
-// Set the environment (e.g., 'production', 'staging', 'develop')
-setEnvironment('develop');
+// Configure the SDK (e.g., set environment, app name)
+configure({
+  environment: 'develop',
+  appName: 'MyAwesomeApp',
+});
 
 async function authenticateUser() {
   try {

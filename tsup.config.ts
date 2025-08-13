@@ -18,6 +18,7 @@ export default defineConfig({
     'src/websocket/index.ts',
     'src/analytics/index.ts',
     'src/core/telemetry.ts',
+    'src/config.ts',
   ], // ← point to your file(s)
   format: ['esm', 'cjs'],
   outDir: 'dist',
