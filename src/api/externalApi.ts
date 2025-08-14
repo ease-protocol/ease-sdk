@@ -19,7 +19,7 @@ export async function fetchExternalBlockchainData<T>(
     switch (coin.toUpperCase()) {
       case 'EASE':
         if (action === 'balance') {
-          url = `${getUrl('EASE_API')}/v1/chain/get_currency_balance`;
+          url = `${getUrl('EASE_CHAIN_API')}/v1/chain/get_currency_balance`;
           method = 'POST';
           body = {
             account: address,
@@ -37,7 +37,7 @@ export async function fetchExternalBlockchainData<T>(
 
           return balance as T;
         } else if (action === 'history') {
-          url = `${getUrl('EASE_API')}/v2/history/get_actions`;
+          url = `${getUrl('EASE_CHAIN_API')}/v2/history/get_actions`;
           response = await internalApi(url, method, body, undefined, false, true);
 
           if (!response.success || !Array.isArray(response.data.actions)) {
